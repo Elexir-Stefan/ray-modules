@@ -1,0 +1,95 @@
+#ifndef _RAY_THREADS_H
+#define _RAY_THREADS_H
+
+#include <ray/arguments.h>
+#include <rmi/rmi.h>
+
+typedef UINT8 PRIORITY;
+
+/**
+ * @brief Mutex type tu use when code is critical and not re-entrant-save
+ * @note Naming convention for mutex-variables: M_UnderscoreFreeUppercaseLetterStartingVariable
+ */
+typedef unsigned long MUTEX;
+typedef UINT32 IPLOCK;
+
+#define NEW_MUTEX(mutex) static MUTEX mutex = MUTEX_FREE
+
+typedef enum {
+	MUTEX_FREE = 0,
+	MUTEX_ILLEGAL = 0xFFFFFFFD,
+	MUTEX_ALREADY_FREE = 0xFFFFFFFE,
+	MUTEX_INSUFFICIENT_RIGHTS = 0xFFFFFFFF
+} MUTEX_STATE;
+
+typedef enum {
+	T_RUNNING = 0,
+	T_IDLE = 1,
+	T_WAITING = 2,
+	T_MSG_RECV = 3,
+	T_EXITING = 5
+} __attribute__((packed)) THREAD_STATE;
+
+typedef struct {
+	UINT32 pid;
+	RMISERIAL serial;
+	UINT32 numExports;
+
+	UINT32 usedMemory;
+	UINT32 usedPages;
+	UINT32 memAllocs;
+	UINT32 lastFitPointerCode;
+	UINT32 lastFitPointerData;
+
+	UINT32 contextSwitches;
+	UINT64 cpuCycles;
+	THREAD_STATE state;
+
+	UINT32 threadNum;
+	BOOL isParent;
+	unsigned char ident[13];
+} THREAD_INFO;
+
+typedef struct {
+	UINT32 numThreads;
+	UINT32 kernelMemory;
+	UINT32 memUsageTotal;
+	UINT32 memFree;
+	THREAD_INFO *thread;
+} THREAD_INFO_LIST;
+
+
+#define RAY_PRIO_COMA		-128
+#define RAY_PRIO_VERYLOW	-64
+#define RAY_PRIO_LOW		-32
+#define RAY_PRIO_LOWER		-10
+#define RAY_PRIO_NORMAL		 0
+#define RAY_PRIO_HIGHER		 10
+#define RAY_PRIO_HIGH		 32
+#define RAY_PRIO_VERYHIGH	 64
+#define RAY_PRIO_REALTIME	 127
+
+
+#define THREAD_INFO_ALL		0
+
+BOOL SYSTEM CreateThread(POINTER entryPoint, PRIORITY prio, ARGUMENTS *args);
+void SYSTEM ExitThread();
+
+void SYSTEM KernelMutexAcquire(MUTEX *mutex);
+MUTEX_STATE SYSTEM KernelMutexStatus(MUTEX *mutex);
+MUTEX_STATE SYSTEM KernelMutexRelease(MUTEX *mutex);
+
+IPLOCK ProcessLockCreate(const char *lockName);
+void ProcessLockEnter(IPLOCK lockUID);
+IPLOCK ProcessLockLeave(IPLOCK lockUID);
+IPLOCK ProcessLockStatus(IPLOCK lockUID);
+IPLOCK ProcessLockDestroy(IPLOCK lockUID);
+
+/**
+ * Get process/thread information
+ * @param pid of the process you want to get information of, 0 for all processes
+ * @return list of process information
+ */
+THREAD_INFO_LIST* GetThreadInfo(UINT32 pid);
+
+#endif

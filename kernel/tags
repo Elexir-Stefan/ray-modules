@@ -1,0 +1,91 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.5.4	//
+BOOL	include/ray/typedefs.h	/^typedef unsigned char BOOL;$/;"	t
+CallPrivileged	include/tdm/callpriv.h	/^void CallPrivileged(void*function) {$/;"	f
+FALSE	include/ray/typedefs.h	12;"	d
+GetPrivLevel	include/tdm/tdm.h	/^UINT32 GetPrivLevel(void) {$/;"	f
+InterruptDone	include/tdm/int.h	/^void InterruptDone(UINT32 irqNum) {$/;"	f
+KPrintf	include/kdisplay/kprintf.h	/^void KPrintf(const char *format, ...) {$/;"	f
+MSG_TYPE	include/rmi/rmi.h	/^} MSG_TYPE;$/;"	t
+PRIVLEVEL	include/threads/thread_types.h	/^typedef UINT8 PRIVLEVEL;$/;"	t
+RAY_MESSAGE	include/rmi/rmi.h	/^} RAY_MESSAGE;$/;"	t
+RAY_RMI	include/rmi/rmi.h	/^} RAY_RMI;$/;"	t
+RAY_TDM	include/tdm/tdm.h	/^} RAY_TDM;$/;"	t
+RMIFUNCTION	include/rmi/rmi.h	/^typedef UINT32 RMIFUNCTION;$/;"	t
+RMIMESSAGE	include/rmi/rmi.h	/^typedef UINT32* RMIMESSAGE;$/;"	t
+RMIRegister	include/rmi/rmi.h	/^RAY_RMI RMIRegister(UINT32 funcUID, void *entryPoint, PRIVLEVEL minPriv, BOOL partnership) {$/;"	f
+RMISERIAL	include/rmi/rmi.h	/^typedef UINT32 RMISERIAL;$/;"	t
+RMISetup	include/rmi/rmi.h	/^RAY_RMI RMISetup(UINT32 mySerial, UINT32 count) {$/;"	f
+RMI_EXPORT_NOT_FOUND	include/rmi/rmi.h	/^	RMI_EXPORT_NOT_FOUND = 1,$/;"	e
+RMI_GEN_ERROR	include/rmi/rmi.h	/^	RMI_GEN_ERROR = 3,$/;"	e
+RMI_INSUFF_RIGHTS	include/rmi/rmi.h	/^	RMI_INSUFF_RIGHTS = 7,$/;"	e
+RMI_NOT_SUPPORTED	include/rmi/rmi.h	/^	RMI_NOT_SUPPORTED = 8$/;"	e
+RMI_NO_SERIAL	include/rmi/rmi.h	/^	RMI_NO_SERIAL = 6,$/;"	e
+RMI_NO_SETUP	include/rmi/rmi.h	/^	RMI_NO_SETUP = 5,$/;"	e
+RMI_SUCCESS	include/rmi/rmi.h	/^	RMI_SUCCESS = 0,$/;"	e
+RMI_TRANSMIT_ERROR	include/rmi/rmi.h	/^	RMI_TRANSMIT_ERROR = 2,$/;"	e
+RMI_WRONG_SETUP	include/rmi/rmi.h	/^	RMI_WRONG_SETUP = 4,$/;"	e
+RMInvoke	include/rmi/rmi.h	/^RAY_RMI RMInvoke(UINT32 appSerial, UINT32 funcUID) {$/;"	f
+RMSG_INVALID_BUFFER	include/rmi/rmi.h	/^	RMSG_INVALID_BUFFER = 1,$/;"	e
+RMSG_INVALID_HANDLE	include/rmi/rmi.h	/^	RMSG_INVALID_HANDLE = 2,$/;"	e
+RMSG_INVALID_THREAD	include/rmi/rmi.h	/^	RMSG_INVALID_THREAD = 4,$/;"	e
+RMSG_INVALID_TYPE	include/rmi/rmi.h	/^	RMSG_INVALID_TYPE = 5,$/;"	e
+RMSG_OUT_OF_MEMORY	include/rmi/rmi.h	/^	RMSG_OUT_OF_MEMORY = 3,$/;"	e
+RMSG_SUCCESS	include/rmi/rmi.h	/^	RMSG_SUCCESS = 0,$/;"	e
+RMSG_UNEXPECTED_STATUS	include/rmi/rmi.h	/^	RMSG_UNEXPECTED_STATUS = 6$/;"	e
+RTYPE_CHAR	include/rmi/rmi.h	/^		RTYPE_CHAR = 7,$/;"	e
+RTYPE_SING16	include/rmi/rmi.h	/^		RTYPE_SING16 = 4,$/;"	e
+RTYPE_SING32	include/rmi/rmi.h	/^		RTYPE_SING32 = 6,$/;"	e
+RTYPE_SINT8	include/rmi/rmi.h	/^		RTYPE_SINT8 = 2,$/;"	e
+RTYPE_STRING	include/rmi/rmi.h	/^		RTYPE_STRING = 8$/;"	e
+RTYPE_UINT16	include/rmi/rmi.h	/^		RTYPE_UINT16 = 3,$/;"	e
+RTYPE_UINT32	include/rmi/rmi.h	/^		RTYPE_UINT32 = 5,$/;"	e
+RTYPE_UINT8	include/rmi/rmi.h	/^	RTYPE_UINT8 = 1,$/;"	e
+RegisterIRQ	include/tdm/int.h	/^void RegisterIRQ(UINT32 irqNum, void* functionAddress) {$/;"	f
+Relinquish	include/threads/sleep.h	/^void Relinquish() {$/;"	f
+RequestIOPort	include/tdm/io.h	/^void RequestIOPort(UINT32 port) {$/;"	f
+SINT16	include/ray/typedefs.h	/^typedef signed short SINT16;$/;"	t
+SINT32	include/ray/typedefs.h	/^typedef signed int SINT32;$/;"	t
+SINT8	include/ray/typedefs.h	/^typedef signed char SINT8;$/;"	t
+SYS_ALLOC_MB	include/sct/sct.h	16;"	d
+SYS_CALL_PRIVILEGED	include/sct/sct.h	8;"	d
+SYS_FREE_MB	include/sct/sct.h	17;"	d
+SYS_GET_PRIV_LEVEL	include/sct/sct.h	9;"	d
+SYS_INT_DONE	include/sct/sct.h	12;"	d
+SYS_MALLOC	include/sct/sct.h	5;"	d
+SYS_PRINTF	include/sct/sct.h	4;"	d
+SYS_REGISTER_IRQ	include/sct/sct.h	10;"	d
+SYS_REG_RECV	include/sct/sct.h	19;"	d
+SYS_RELINQUISH	include/sct/sct.h	6;"	d
+SYS_REQUEST_IO_PORT	include/sct/sct.h	7;"	d
+SYS_RMI_REGISTER	include/sct/sct.h	15;"	d
+SYS_RMI_SETUP	include/sct/sct.h	14;"	d
+SYS_RM_INVOKE	include/sct/sct.h	13;"	d
+SYS_SEND_MSG	include/sct/sct.h	18;"	d
+SYS_SLEEP	include/sct/sct.h	11;"	d
+Sleep	include/threads/sleep.h	/^void Sleep(void) {$/;"	f
+SysCall	include/raykernel.h	/^inline void SysCall(UINT32 functionNumber, void *argumentPointer, void *returnPointer) {$/;"	f
+TDM_ILLEGAL	include/tdm/tdm.h	/^	TDM_ILLEGAL = 3$/;"	e
+TDM_NOT_ALLOWED	include/tdm/tdm.h	/^	TDM_NOT_ALLOWED = 2,$/;"	e
+TDM_OK	include/tdm/tdm.h	/^	TDM_OK = 1,$/;"	e
+TRUE	include/ray/typedefs.h	13;"	d
+UINT16	include/ray/typedefs.h	/^typedef unsigned short UINT16;$/;"	t
+UINT32	include/ray/typedefs.h	/^typedef unsigned int UINT32;$/;"	t
+UINT8	include/ray/typedefs.h	/^typedef unsigned char UINT8;$/;"	t
+_RAY_CALLPRIV_H	include/tdm/callpriv.h	2;"	d
+_RAY_INT_H	include/tdm/int.h	2;"	d
+_RAY_IO_H	include/tdm/io.h	2;"	d
+_RAY_KERNEL_H	include/raykernel.h	2;"	d
+_RAY_KPRINTF_H	include/kdisplay/kprintf.h	2;"	d
+_RAY_MEMORY_H	include/memory/memory.h	2;"	d
+_RAY_RMI_H	include/rmi/rmi.h	2;"	d
+_RAY_TDM_H	include/tdm/tdm.h	2;"	d
+_RAY_TYPEDEFS_H	include/ray/typedefs.h	2;"	d
+_RAY__H	include/threads/sleep.h	2;"	d
+_SCT_H	include/sct/sct.h	2;"	d
+_THREAD_TYPES_	include/threads/thread_types.h	2;"	d
+malloc	include/memory/memory.h	/^void *malloc(UINT32 size) {$/;"	f

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+CFLAGS=-"g3 -Wall -Werror"
+
+gcc vfs.c vfstree.c unicode.c -o vfs $CFLAGS

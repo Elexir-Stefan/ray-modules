@@ -1,0 +1,5 @@
+base referer
+rect $structVFS__INFO.html 135,191 257,324
+rect $structATTRIBUTES.html 5,14 112,88
+rect $structOWNER.html 136,14 211,88
+rect $structLUString.html 273,6 353,96

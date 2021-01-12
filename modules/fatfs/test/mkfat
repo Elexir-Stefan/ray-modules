@@ -1,0 +1,3 @@
+#!/bin/sh
+
+gcc fat.c -Wall -O0 -g3 -o fat

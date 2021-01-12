@@ -1,0 +1,13 @@
+#!/bin/sh
+
+DIRS=`cat allmodules.names`
+
+echo -e "Updating mkmake script in"
+
+
+	for MODULE in $DIRS
+	do
+		cp template/mkmake $MODULE/
+		cp template/raymodule.ld $MODULE/
+		echo $MODULE
+	done

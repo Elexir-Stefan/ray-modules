@@ -1,0 +1,272 @@
+/* Standard styles */
+
+a {                                                                                               
+  color: #0000AA;                                                                               
+  font-weight: bold;                                                                            
+  text-decoration: none;                                                                        
+}                                                                                                 
+                                                                                                              
+a:link {
+  text-decoration: none;
+}
+a:visited {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: none;
+}
+a:active {
+  text-decoration: none;
+}
+
+.menu li a {
+    text-decoration: none;
+}                                                                                                              
+                                                                                                              
+body {                                                                                            
+                                                                                                              
+  font-family: Georgia, Times New Roman, Times;                                           
+  line-height: normal;                                                                          
+  margin-left: 0px;                                                                            
+  margin-top: 0px;  
+  margin-right: 0px;                                                                            
+  margin-bottom: 0px;                                                                            
+                                                                                                                                              
+}                                                                                                 
+
+table {
+    width: 100%;
+}                                                                                                                                              
+                                                                                                                                              
+/* Header styles */                                                                               
+
+.headersitelogo {
+  background-image: url(logo.png);
+  background-repeat: no-repeat;
+  height: 85px;
+}
+                                                                                                                                              
+.headersitename {                                                                                 
+  font-family: Verdana, Arial, Helvetica, sans-serif;                                           
+  vertical-align: middle;         
+  background-color: #DE1E26;    
+} 
+
+#tabfloat {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  height: 20px;
+  white-space: nowrap;
+  color: #DE1E26;
+  font-size: 1px;
+}
+
+#home {
+  width: 150px;
+  height: 85px;
+}
+
+#search {
+  position: absolute;
+  right: 3px;
+  top: 50px;
+  height: 29px;
+  white-space: nowrap;
+  background-color: #DE1E26;
+}
+
+#search .form-text {
+  width: 8em;
+  height: 1.4em;
+  padding: 0 0.5em 0 0.5em;
+  margin: 0 0 0.5em 0;
+}
+
+#search .form-submit {
+  margin-top: 0.5em;
+  height: 1.5em;
+}
+
+#content {
+  margin-top: 0px;
+}
+
+A.headerlinks {
+  color: #FFFFFF;
+  background-color: #666666;
+  font-size: 12px;
+  padding: 5px;
+  border: 1px solid #777777;
+  border-radius: 8px 8px;
+  -moz-border-radius: 8px 8px 8px 8px;
+}
+
+A.headerlinks:hover {
+  background-color: #888888;
+  text-decoration: none;
+}
+
+
+.headerlinks, .headerlinks:link, .headerlinks:visited {
+  white-space: nowrap;
+  font-family: Geneva, Arial, Helvetica, sans-serif, Verdana;
+  font-weight: bold;
+}
+
+.headerspace {
+	padding: 10px;
+
+}
+
+
+/* Node styles */
+
+.nodeheader {
+    border-bottom: 1px solid black;
+}
+
+.nodetitle {
+    font-family: Georgia, Times New Roman, Times;                                           
+    font-size: 18px;
+    color: #888888;
+}
+
+.nodedate {
+    color: #CCCCCC;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 80%;
+}
+
+
+.nodebody {
+    font-family: Georgia, Times New Roman, Times;                                           
+    color: #333333;
+    line-height: 150%;
+    font-size: 80%;
+    font-weight: normal;
+    padding-bottom: 6px;
+}
+
+.nodelinks {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    color: #666666;
+}
+
+
+/* Box styles */
+
+.boxleft {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+.boxright {
+    font-family: Georgia, Times New Roman, Times;                                           
+    font-weight: normal;
+    color: #333333;
+    font-size: 18px;
+}
+
+.boxtitle {
+    color: #666666;
+    height: 30px;
+    font-weight: bold;
+}
+
+.boxtitleright {
+    color: #888888;
+    font-weight: normal;
+}
+
+.boxbody {
+    font-size: 80%;
+}
+
+
+
+
+/* Misc other styles */
+
+
+.bodycolumn {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+}
+
+.navcolumn {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    background-color: #CCCCCC;
+}
+
+
+.lineh {
+	background-image: url(images/dotlineh.gif);
+	background-repeat: repeat-x;
+    width: 100%;
+}
+
+.linev {
+	background-image: url(images/dotlinev.gif);
+	background-repeat: repeat-y;
+	width: 24px;
+    white-space: nowrap;
+    padding-left: 5px;
+    padding-right: 5px;
+
+}
+
+.block {
+  border-radius: 8px 8px;
+  -moz-border-radius: 8px 8px 8px 8px;
+}
+
+.delimiter {                                                                                      
+    background-image: url(images/delimiter.gif);                                                 
+    background-repeat: no-repeat;                                                                 
+    width: 5px;                                                                                   
+    margin-right: 5px;                                                                            
+    margin-left: 5px;                                                                             
+    background-position: center;                                                                  
+                                                                                                                          
+                                                                                                                          
+}
+
+.block-list {
+  padding-left: 1.0em;
+  margin-left: 0em;
+  list-style-image: url("../../misc/menu-collapsed.png");
+}
+
+.groupHeader { 
+    background-color: #cccccc
+}
+
+.comment {
+	border: thin solid #cccccc;
+	padding-left: 4px;
+	padding-right: 4px;
+	padding-bottom: 2px;
+}
+
+.poll .title {
+  color: black;
+  font-size: 12px;
+  font-weight: normal;
+  font-style: oblique;
+  text-decoration: none;
+}
+
+.prio1 {
+	color: #ff0000;
+}
+
+.prio2 {
+	color: #008888;
+}
+

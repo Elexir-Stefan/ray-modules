@@ -1,0 +1,125 @@
+/* BonaFide CSS Document */
+body {
+	margin: 0;
+	padding: 0;
+	background: #fafafa;
+	font:14px verdana, arial, helvetica, sans-serif;
+}
+
+h1 { font-size:1.5em}
+h2 { font-size:1.4em}
+h3 { font-size:1.3em}
+h4 { font-size:1.2em}
+h5 { font-size:1.1em}
+h6 { font-size:1em}
+
+p { line-height: 1.2em; }
+
+
+pre.code {
+	background: rgb(221, 221, 221);
+	color: rgb(0, 0, 0);
+	display: block;
+	font-family: courier, monospace;
+	margin-left: 10px;
+	margin-right: 10px;
+	position: relative;
+	padding: 3px;
+	padding-bottom: 20px;
+	width: 90%;
+	overflow: scroll
+}
+
+ul {list-style:url(bullet.gif)}
+pre { font-family: courier, monospace}
+
+h1 {
+  margin:0;
+  padding:20px 20px 8px 0;
+  border-bottom:1px solid #ddd;
+  font:1.5em Georgia,Serif;
+  color:#776
+}
+
+#header{background:#fff}
+#topmenu {
+	border: 1px solid #000;
+	font: 10px Geneva, Arial, Helvetica, sans-serif;
+	background: #333
+}
+#topmenu ul{list-style:none;margin:0;height:1.4em}
+#topmenu li{width:20%;float:left;display:block}
+#wrapper{margin:0 auto;background:#fff;width:770px}
+#leftbar{float:left;width:150px}
+#leftbar ul{list-style:none;padding-left:5px}
+#poll,#reqread,#catmenu{margin:0 auto;text-align:center;width:130px}
+#reqread {margin-top:30px}
+#reqread a{display:block}
+#catmenu li{border-bottom:1px solid #eee}
+#catmenu li.sel{background:#eee}
+#content{width:600px;float:left;margin:0 8px}
+#front{width:450px;float:left;margin:0 8px}
+#rightbar{float:left;width:150px}
+
+
+.news {
+	border-left:10px solid #f0f0f0;
+	background-color: #fff;
+	padding-left: 3px;
+	margin: 5px 0 20px 0
+}
+
+.sidebar {
+	background:#f0f0f0;
+	padding:4px;
+	margin:5px 0 10px 0;
+}
+.sidebar p {
+	font-size:.8em;
+}
+
+#credit {
+	font-size: .7em;
+	color: #666;
+	text-align: center;
+	vertical-align: bottom;
+	clear:both
+}
+
+
+a:link {
+	font-weight: bold;
+	text-decoration: none;
+	color: #036
+}
+a:visited {
+	font-weight: bold;
+	text-decoration: none;
+	color: #039
+}
+a:active {
+	color: #06f;
+	text-decoration: none;
+	font-weight: bold
+}
+a:hover {
+	font-weight: bold;
+	text-decoration: none;
+	color: #06f
+}
+
+#topmenu a:link {color: #fff; text-decoration: none; }
+#topmenu a:visited {color: #eee; text-decoration: none; }
+#topmenu a:active {color: #eee; text-decoration: none; }
+#topmenu a:hover {color: #eee; text-decoration: underline; }
+
+/* for osnews feed */
+a.title:link{font: bold 10pt arial,sans-serif;color: #000;text-decoration: none}
+a.title:active{font: bold 10pt arial,sans-serif;color: #ccc;text-decoration: underline}
+a.title:visited{font: bold 10pt arial,sans-serif;color: #000;text-decoration: none}
+a.title:hover{font: bold 10pt arial,sans-serif;color: #06f;text-decoration: underline}
+
+a.desc:link{font: 8pt arial,sans-serif;color: #000;text-decoration: none}
+a.desc:active{font: 8pt arial,sans-serif;color: #000;text-decoration: underline}
+a.desc:visited{font: 8pt arial,sans-serif;color: #333;text-decoration: none}
+a.desc:hover{font: 8pt arial,sans-serif;color: #000;text-decoration: none}

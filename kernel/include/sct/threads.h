@@ -1,0 +1,24 @@
+#ifndef _SCT_THREADS_H
+#define _SCT_THREADS_H
+
+#define SYS_THREAD_CREATE	116
+#define SYS_THREAD_EXIT		117
+#define SYS_THREAD_INFO		118
+#define SYS_IP_LOCK_CREATE	122
+#define SYS_IP_LOCK_GET		123
+#define SYS_IP_LOCK_ENTER	124
+#define SYS_IP_LOCK_LEAVE	125
+#define SYS_IP_LOCK_STATUS	126
+#define SYS_IP_LOCK_DESTROY	127
+#define SYS_THREAD_GET		132
+#define SYS_THREAD_ABORT	133
+#define SYS_THREAD_NOTIFY	134
+#define SYS_THREAD_ALIVE	135
+#define SYS_THREAD_JOIN		136
+#define SYS_BARRIER_ARRIVE	140
+#define SYS_BARRIER_GO		141
+#define SYS_BARRIER_CLOSE	142
+#define SYS_BARRIER_CREATE	143
+#else
+    #error "sct/threads.h included more than once!"
+#endif

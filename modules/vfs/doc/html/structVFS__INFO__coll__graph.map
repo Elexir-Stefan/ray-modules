@@ -1,0 +1,4 @@
+base referer
+rect $structATTRIBUTES.html 6,13 112,88
+rect $structOWNER.html 136,13 211,88
+rect $structLUString.html 235,5 315,96

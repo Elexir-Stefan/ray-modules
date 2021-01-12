@@ -1,0 +1,4 @@
+#define ERR_PCI_OUT_OF_MEMORY	1
+#define ERR_PCI_NO_BUS_FOUND	2
+
+BOOL PCIInit();

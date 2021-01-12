@@ -1,0 +1,9 @@
+#ifndef _SCT_PROCESS_H
+#define _SCT_PROCESS_H
+
+#define SYS_LOAD_PROCESS	129
+
+
+#else
+    #error "sct/process.h included more than once!"
+#endif

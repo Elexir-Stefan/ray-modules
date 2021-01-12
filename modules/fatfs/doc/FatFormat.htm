@@ -1,0 +1,1086 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+<meta http-equiv="Content-Language" content="de">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="copyright" content="Anton Zechner (C) 2001">
+<meta name="keywords" content="C,C++,SOURCECODE,SOURCE,CODE,DOWNLOAD,FAT,Bootsektor,MBR,Masterbootrcord,Aufbau,Anton,Zechner,VISUAL C++">
+<meta name="description" content="Eine Seite zum Downloaden von C++ Sourcecodes von Anton Zechner"><title>Das FAT Format</title></head><body background="FatFormat-Dateien/HG_gelb.bmp">
+
+<p><b><font color="#808000" face="Verdana" size="5">Das FAT Datei Format</font></b></p>
+<p>&nbsp;</p>
+<blockquote>
+<p><font face="Verdana" size="2"><a href="#PAR1">Der Master-Boot-Record</a><br>
+<a href="#PAR2">Aufbau einer Partition</a><br>
+<a href="#BOOT">Der Boot Sektor</a><br>
+<a href="#FAT">Die FAT (File Alocation Table)</a><br>
+<a href="#DIR">Verzeichniseinträge</a><br>
+<a href="#INFO">Der Infosektor</a></font></p>
+</blockquote>
+<p>&nbsp;</p>
+<p><b><font color="#0000ff" face="Verdana"><a name="PAR1"></a></font><font color="#808000" face="Verdana">Der Master-Boot-Record</font></b></p>
+<blockquote>
+<p align="justify"><font face="Verdana" size="2">Festplatten beginnen mit einer
+Partitionstabelle auf Kopf 0, Zylinder 0 und Sektor 1. Bei Disketten entfällt
+diese Tabelle. Die Partitionstabelle wird auch Master-Boot-Record genannt (MBR), und hat folgenden Aufbau:</font></p>
+<blockquote>
+  <table bgcolor="#ffffff" border="1" width="66%">
+    <tbody><tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2"><b>Offset</b></font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>Größe</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>Funktion</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x000</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">446
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Bootcode</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1BE</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">16
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">1. Eintrag in
+        der </font><font face="Verdana" size="2">Partitionstabelle&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1CE</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">16
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">2. Eintrag in
+        der </font><font face="Verdana" size="2">Partitionstabelle&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1DE</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">16
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">3. Eintrag in
+        der </font><font face="Verdana" size="2">Partitionstabelle&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1EE</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">16
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">4. Eintrag in
+        der </font><font face="Verdana" size="2">Partitionstabelle&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1FE</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Signatur 0xAA55</font></td>
+    </tr>
+  </tbody></table>
+</blockquote>
+<p><font face="Verdana" size="2">Die Partitionstabelleneinträge haben folgenden
+Aufbau:</font></p>
+<blockquote>
+  <table bgcolor="#ffffff" border="1" width="66%">
+    <tbody><tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2"><b>Offset</b></font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>Größe</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>Funktion</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x00</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">0x80:
+        bootfähig&nbsp; 0x00: nicht bootfähig</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x01</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Startkopf der
+        Partition (0 bis n)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x02</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Bit 0-5
+        Startsektor (1 bis 63) Bit 6-7 sind zusätzliche Bits für den
+        Startzylinder&nbsp;&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x03</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Startzylinder&nbsp;
+        (0 bis 1023)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x04</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">OS-Type:<br>
+        </font><font face="Verdana" size="1">
+        0x00 = Eintrag leer<br>
+        0x01 = FAT12&nbsp;<br>
+        0x02 = Xenix<br>
+        0x03 = Xenix<br>
+        0x04 = FAT16 (max. 32 MB)<br>
+        0x05 = extended DOS-Partition&nbsp; (max. 2 GB)<br>
+        0x06 = FAT16 (max. 2 GB)<br>
+        0x07 = HPFS/NTFS<br>
+        0x08 = AIX&nbsp;<br>
+        0x09 = AIX bootable<br>
+        </font><font face="Verdana" size="1">
+        0x</font><font face="Verdana" size="1">0A = OS/2 Bootmanager</font><font face="Verdana" size="1"><br>
+        0x0B = FAT32 (CHS Adressierung)<br>
+        0x0C = FAT32 (LBA Adressierung)<br>
+        0x0E = FAT16 (LBA Adressierung)<br>
+        0x0F = extended Partition&nbsp; (LBA,mehr als 1024 Zylinder)<br>
+        0x10 = OPUS<br>
+        0x11 = hidden FAT12<br>
+        0x12 = Compaq diagnost<br>
+        0x14 = hidden FAT16 bis 32MB<br>
+        0x16 = hidden FAT16<br>
+        0x17 = hidden HPFS / NTFS<br>
+        0x18 = AST Windows swap<br>
+        0x1B = hidden WIN95 FAT32<br>
+        0x1C = hidden WIN95 FAT32 (LBA)<br>
+        0x1E = hidden WIN95 FAT16 (LBA)<br>
+        0x24 = NEC DOS<br>
+        0x39 = Plan 9<br>
+        0x3C = Partition Magic<br>
+        0x40 = Venix 80286<br>
+        0x41 = PPC PReP boot<br>
+        0x42 = SFS<br>
+        0x4D = QNX4.x<br>
+        0x4E = QNX4.x 2nd partition<br>
+        0x4F  = QNX4.x 3rd partition<br>
+        0x50 = OnTrack DM<br>
+        0x51 = OnTrack DM6 Aux<br>
+        0x52 = CP/M<br>
+        0x53 = OnTrack DM6 Aux<br>
+        0x54 = OnTrack DM6<br>
+        0x55 = EZ-Drive<br>
+        0x56 = Golden Bow<br>
+        0x5c = Priam Edisk<br>
+        0x61 = Speed Stor<br>
+        0x63 = GNU HURD or SYS<br>
+        0x64 = Novell NetWare<br>
+        0x65 = Novell<br>
+        0x70 = Disk Secure Mult<br>
+        0x75 = UNIX PC/IX<br>
+        0x80 = aktiv (old Minix)<br>
+        0x81 = Booten von Laufwerk D:<br>
+        0x82 = Linux Swap<br>
+        0x83 = Linux native<br>
+        0x84 = OS/2 hidden C:<br>
+        0x85 = LINUX extended<br>
+        0x86 = NTFS volume set<br>
+        0x87 = NTFS volume set<br>
+        0x8e = LINUX LVM<br>
+        0x93 = Amoebla<br>
+        0x94 = Amoebla BBT<br>
+        0x9F  = BSD/OS<br>
+        0xA0 = IBM Thinkpad hidden<br>
+        0xA5 = BSD/386<br>
+        0xA6 = Open BSD<br>
+        0xA7 = NeXT STEP<br>
+        0xB7 = BSDI fs<br>
+        0xB8 = BSDI swap<br>
+        0xC1 = DRDOS/sec (FAT32)<br>
+        0xC4 = DRDOS/sec (FAT32(LBA))<br>
+        0xC6 = DRDOS/sec (FAT16(LBA))<br>
+        0xC7 = Syrinx<br>
+        0xDA = Non-Fs data<br>
+        0xDB = Concurrent DOS , CP/M , CTOS<br>
+        0xDE = Dell Utility<br>
+        0xE1 = DOS access<br>
+        0xE3 = DOS R/o<br>
+        0xE4 = Speed Stor<br>
+        0xEB = BeOS fs<br>
+        0xEE = EFI GPT<br>
+        0xEF  = EFI (FAT12/16/32)<br>
+        0xF1  = Speed Stor<br>
+        0xF2  = DOS secondary<br>
+        0xF4  = Speed Stor<br>
+        0xFD  = LINUX raid auto<br>
+        0xFE  = LANstep<br>
+        0xFF   = BBT</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x05</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Endkopf der
+        Partition (0 bis n)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x06</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Bit 0-5
+        Endsektor (1 bis 63) Bit 6-7 sind zusätzliche Bits für den
+        Endzylinder&nbsp;&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x07</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Endzylinder&nbsp;
+        (0 bis 1023)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x08</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anfangssektor
+        der Partitionsdaten (absoluter LBA)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x0C</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Größe der
+        Partition in Sektoren</font></td>
+    </tr>
+  </tbody></table>
+</blockquote>
+<p align="justify"><font face="Verdana" size="2">Die LBA Adressierung (large block array) ist
+für Festplatten mit mehr als 1024 Zylindern, bei weniger Zylindern kann weiter
+die CHS Adressierung verwendet werden (cylinder head sector).&nbsp;Bei der </font><font face="Verdana" size="2"> LBA Adressierung
+wird statt Kopf,Zylinder,Sektor ein 32 Bit DWORT Wert für die Sektor </font><font face="Verdana" size="2"> Adressierung verwendet.</font></p>
+<p align="justify"><font face="Verdana" size="2">Aus den
+Partitionsdaten kann die Position und
+Größe der logischen Laufwerke ermittelt werden. Dazu dienen die DWORD
+Werte bei
+Offset 0x08 und 0x0C. Handelt es sich bei der Partition um eine
+"extended
+Partition" so ist diese kein logisches Laufwerk sondern eine weitere
+Unterpartition mit einem weitern Master-Boot-Record. Zu allen
+Positionen der
+LBA's ist der Anfangssektor der "extended Partition"
+hinzu zu zählen.</font></p>
+<p><img src="FatFormat-Dateien/Partitons.gif" border="0" height="486" width="613"></p>
+</blockquote>
+<p><b><font color="#0000ff" face="Verdana"><a name="PAR2"></a></font><font color="#808000" face="Verdana">Aufbau einer
+Partition</font></b></p>
+<blockquote>
+  <p align="justify"><font face="Verdana" size="2">Am Anfang jeder FAT-Partition eines logischen
+  Laufwerkes steht der </font><font face="Verdana" size="2">Boot Sektor. Er enthält
+  Angaben über
+  die Größe und Art der Partition. Anschließend kommt ein Bereich mit
+  reservierten Sektoren, in diesen kann auch eine Kopie des Bootsektors vorhanden
+  sein. Danach kommen die FAT-Sektoren. Um eine höhere Sicherheit zu erhalten
+  werden meist zwei FAT Tabellen verwendet, falls eine beschädigt wird. Die FAT
+  Tabellen enthalten Informationen über die Cluster-Ketten die in den einzelnen
+  Dateien gespeichert sind. Nach den FAT's folgt das Rootverzeichnis. Es
+  enthält alle Dateien die im Hauptverzeichnis stehen. Bei FAT32 Partitionen
+  ist kein Rootverzeichnis vorhanden, es ist durch eine Cluster-Kette ersetzt
+  deren Anfang im Boot Sektor steht. Zuletzt kommen die Datensektoren. Sie sind
+  in einzelne Cluster unterteilt. Jeder Cluster besteht aus ein oder mehreren
+  Sektoren. Der erste Cluster hat die Nummer 2 und beginnt beim ersten
+  Datensektor.&nbsp;</font></p>
+  <p><font face="Verdana" size="2"><img src="FatFormat-Dateien/PartitionAufbau.gif" border="0" height="184" width="837">&nbsp;</font></p>
+</blockquote>
+<p>&nbsp;</p>
+<p><b><font color="#0000ff" face="Verdana"><a name="BOOT"></a></font><font color="#808000" face="Verdana">Der Boot Sektor</font></b></p>
+<blockquote>
+<p><font face="Verdana" size="2">Am Anfang jedes logischen Laufwerkes steht ein
+ein Boot Sektor der folgenden Aufbau hat:</font></p>
+<blockquote>
+  <table bgcolor="#ffffff" border="1" width="66%">
+    <tbody><tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2"><b>Offset</b></font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>Größe</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>Funktion</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x000</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">3
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Jump Befehl zu
+        Bootcode</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x003</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">8
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">OEM Name&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x00B</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Bytes je Sektor</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x00D</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Sektoren je
+        Cluster</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x00E</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        reservierten Sektoren, relativ zum Anfang der Partition.</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x010</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        FAT's</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x011</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Einträge im Hauptverzeichnis</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x013</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Sektoren auf der Disk</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x015</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Media Art:<br>
+        </font><font face="Verdana" size="1">
+        0xF0     2.88 MB    3.5-inch, 2-sided, 36-sector<br>
+        0xF0     1.44 MB    3.5-inch, 2-sided, 18-sector<br>
+        0xF9     720 KB     3.5-inch, 2-sided, 9-sector<br>
+        0xF9     1.2 MB     5.25-inch, 2-sided, 15-sector<br>
+        0xFD     360 KB     5.25-inch, 2-sided, 9-sector<br>
+        0xFF     320 KB     5.25-inch, 2-sided, 8-sector<br>
+        0xFC     180 KB     5.25-inch, 1-sided, 9-sector<br>
+        0xFE     160 KB     5.25-inch, 1-sided, 8-sector<br>
+        0xF8 Festplatte</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x016</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Sektoren je FAT</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x018</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Sektoren je Spur</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x01A</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Leseschreibköpfe</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x01C</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        versteckten Sektoren</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x020</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Gesamt Anzahl
+        der Sektoren</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x024</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Physikalische
+        Disk Nummer (0x80,0x81 ... )</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x025</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Jetziger Kopf
+        (unbenutzt)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x026</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Signatur</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x027</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Seriennummer</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x02B</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">11
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Laufwerksname</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x036</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">8
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">System ID</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x03E</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">448
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Boot Programm</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1FE</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Signatur 0xAA55</font></td>
+    </tr>
+  </tbody></table>
+</blockquote>
+<p><font face="Verdana" size="2">Bei FAT32 Partitionen ist der Bootsektor etwas
+anders:</font></p>
+<blockquote>
+  <table bgcolor="#ffffff" border="1" width="66%">
+    <tbody><tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2"><b>Offset</b></font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>Größe</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>Funktion</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x000</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">3
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Jump Befehl zu
+        Bootcode</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x003</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">8
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">OEM Name&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x00B</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Bytes je Sektor</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x00D</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Sektoren je
+        Cluster</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x00E</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        reservierten Sektoren, relativ zum Anfang der Partition.</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x010</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        FAT's&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x011</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Einträge im Hauptverzeichnis&nbsp; (immer 0)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x013</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Sektoren (immer 0)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x015</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Media Art:<br>
+        </font><font face="Verdana" size="1">
+        0xF0     2.88 MB    3.5-inch, 2-sided, 36-sector<br>
+        0xF0     1.44 MB    3.5-inch, 2-sided, 18-sector<br>
+        0xF9     720 KB     3.5-inch, 2-sided, 9-sector<br>
+        0xF9     1.2 MB     5.25-inch, 2-sided, 15-sector<br>
+        0xFD     360 KB     5.25-inch, 2-sided, 9-sector<br>
+        0xFF     320 KB     5.25-inch, 2-sided, 8-sector<br>
+        0xFC     180 KB     5.25-inch, 1-sided, 9-sector<br>
+        0xFE     160 KB     5.25-inch, 1-sided, 8-sector<br>
+        0xF8 Festplatte</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x016</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Sektoren je FAT (immer 0)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x018</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Sektoren je Spur</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x01A</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Leseschreibköpfe</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x01C</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        versteckten Sektoren</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x020</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Gesamt Anzahl
+        der Sektoren</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x024</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        Sektoren je FAT</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x028</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Flags<br>
+        0x0080: Keine FAT Spiegelung<br>
+        0x000F: Anzahl der FAT's</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x02A</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Version (immer
+        0)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x02C</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Cluster Nummer
+        für Root-Verzeichnis</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x030</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Position des
+        Infosektors (relativ zum 1. Datensektor) <br>
+        </font><font face="Verdana" size="1">
+        1=normal <br>
+        0xFFFF=keiner</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x032</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Backup Boot
+        Sektor (6=normal)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x034</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">12
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">unbenutzt
+        (immer 0)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x040</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Physikalische
+        Disk Nummer (0x80,0x81 ... )</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x041</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Jetziger Kopf
+        (unbenutzt)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x042</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Signatur</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x043</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Seriennummer</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x047</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">11
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Laufwerksname</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x052</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">8
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">System ID</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x05A</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">420
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Boot Programm</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1FE</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Signatur 0xAA55</font></td>
+    </tr>
+  </tbody></table>
+</blockquote>
+  <p><font face="Verdana" size="2">Mit dem Boot Sektor wird bestimmt wie ein
+  Laufwerk aufgebaut ist.</font></p>
+</blockquote>
+<p>&nbsp;</p>
+<p><b><font color="#0000ff" face="Verdana"><a name="FAT"></a></font><font color="#808000" face="Verdana">Die FAT (File Alocation Table)</font></b></p>
+<blockquote>
+  <p align="justify"><font face="Verdana" size="2">In einer FAT ist für jeden Cluster ein
+  Eintrag vorhanden. Der Eintrag bestimmt ob ein Cluster frei ist, ob er defekt
+  ist, ob er reserviert ist, oder ob er belegt ist. Bei belegten Sektoren wird
+  immer die Nummer des nächsten Clusters eingetragen. Damit ist es möglich
+  Ketten aus Clustern zu definieren, die zu einer Datei gehören. In einem
+  Verzeichniseintrag steht dann der Anfangs-Cluster dieser Dateien.
+  Die ersten beiden Einträge in der FAT sind der Media-Deskriptor (siehe <a href="#BOOT">Boot
+  Sektor</a> bei Offset 0x15)</font></p>
+  <p><img src="FatFormat-Dateien/FAT.gif" border="0" height="541" width="679"></p>
+  <p><font face="Verdana" size="2">Die einzelnen FAT Einträge haben folgende
+  Bedeutung:</font></p>
+<blockquote>
+  <table bgcolor="#ffffff" border="1" width="75%">
+    <tbody><tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>FAT12</b></font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>FAT16</b></font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>FAT32</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>&nbsp;Funktion</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">0x000</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">0x0000</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">0x0000000</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">&nbsp;freier Cluster</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">&nbsp;0xFF0-0xFF6&nbsp; <br>
+</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">0xFFF0-0xFFF6 <br>
+</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">---</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">&nbsp;Cluster fürs
+        Rootverzeichnis</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">0xFF7</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">0xFFF7</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">0xFFFFFF7</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">&nbsp;defekter
+        Cluster</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">&nbsp;0xFF8-0xFFF</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">&nbsp;0xFFF8-0xFFFF</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">&nbsp;0xFFFFFF8-0xFFFFFFF <br>
+</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">&nbsp;letzter Cluster
+        einer Datei</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">xxx</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">xxxx</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">xxxxxxxx</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">&nbsp;nächster
+        Cluster einer Datei&nbsp;</font></td>
+    </tr>
+  </tbody></table>
+</blockquote>
+  <p><font face="Verdana" size="2">Beim FAT32 Format sind die oberen 4 Bits
+  aller Einträge reserviert.&nbsp;</font></p>
+  <p><font face="Verdana" size="2"> Beim FAT12 Format sind die Einträge nach folgendem Format angeordnet.</font></p>
+<blockquote>
+  <table bgcolor="#ffffff" border="1" width="75%">
+    <tbody><tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>Offset</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>Funktion</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">n*3
+        -1</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">...</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">n*3
+        +0</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Gerader Eintrag
+        Bits 0-7</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">n*3
+        +1</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Gerader Eintrag
+        Bits 8-11 (low), Ungerader Eintrag Bits 0-3 (high)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">n*3
+        +2</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Ungerader
+        Eintrag Bits 4-11</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">n*3
+        +3</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">...</font></td>
+    </tr>
+  </tbody></table>
+</blockquote>
+  <p align="justify"><font face="Verdana" size="2">Bei FAT16 ist jeder Eintrag ein 2 Byte WORD (little
+  Endian), bei FAT32 ist jeder Eintrag ein 4 Byte DWORD (little Endian).</font> <font face="Verdana" size="2">Die FAT-Sektoren beginnen nach dem Bootsektor
+  genau um die Anzahl der </font><font face="Verdana" size="2">
+        reservierten Sektoren später (Offset 0x0E im Boot Sektor). Die Anzahl
+  der FAT-Sektoren berechnet sich nach folgendem Schema:</font></p>
+  <blockquote>
+    <pre><font color="#0000ff" face="Courier New" size="2">F<sub>AT_Sektoren</sub> </font><font face="Courier New" size="2">=</font><font color="#0000ff" face="Courier New" size="2"> A<sub>nzahl_der_FATs</sub> </font><font face="Courier New" size="2">*</font><font color="#0000ff" face="Courier New" size="2"> S<sub>ektoren_je_FAT</sub></font></pre>
+  </blockquote>
+  <p align="justify"><font face="Verdana"><font size="2">Nach dem FAT Sektoren kommen die
+  Sektoren für das Root-Verzeichnis. Bei FAT32 gibt es kein Root-Verzeichnis
+  sondern eine Cluster-Kette für das Verzeichnis. </font></font><font face="Verdana" size="2">Die
+  Größe der FAT-Einträge wird aus der Anzahl der Datensektoren berechnet:</font></p>
+  <blockquote>
+    <pre><font color="#0000ff" face="Courier New" size="2">R<sub>oot_Verzeichnis_Sektoren </sub></font><font face="Courier New" size="2">=</font><font color="#0000ff" face="Courier New" size="2"> </font><font face="Courier New" size="2">(</font><font color="#0000ff" face="Courier New" size="2">V<sub>erzeichnis_Einträge</sub></font><font face="Courier New" size="2">*</font><font color="#0000ff" face="Courier New" size="2">32</font><font face="Courier New" size="2">+</font><font color="#0000ff" face="Courier New" size="2">B<sub>yte_je_Sektoren</sub></font><font face="Courier New" size="2">-</font><font color="#0000ff" face="Courier New" size="2">1</font><font face="Courier New" size="2">) / </font><font color="#0000ff" face="Courier New" size="2">B<sub>yte_je_Sektor</sub>&nbsp;&nbsp;
+S<sub>ektoren_Anzahl</sub> </font><font face="Courier New" size="2">=</font><font color="#0000ff" face="Courier New" size="2"> G<sub>esamt_Sektoren</sub> </font><font face="Courier New" size="2">-</font><font color="#0000ff" face="Courier New" size="2"> R<sub>eservierte_Sektoren</sub> </font><font face="Courier New" size="2">-</font><font color="#0000ff" face="Courier New" size="2"> </font><font color="#0000ff" face="Courier New" size="2">F<sub>AT_Sektoren</sub> </font><font face="Courier New" size="2">-</font><font color="#0000ff" face="Courier New" size="2"> R<sub>oot_Verzeichnis_Sektoren</sub>&nbsp;</font></pre>
+    <pre><font color="#0000ff" face="Courier New" size="2">C<sub>luster_Anzahl</sub> </font><font face="Courier New" size="2"><font color="#0000ff"> </font>=</font><font color="#0000ff" face="Courier New" size="2"> S<sub>ektoren_Anzahl </sub></font><font face="Courier New" size="2">/ <font color="#0000ff">S</font></font><font color="#0000ff" face="Courier New" size="2"><sub>ektoren_je_Cluster</sub></font></pre>
+  <table bgcolor="#ffffff" border="1" width="66%">
+    <tbody><tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>FAT
+        Type</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>Cluster
+        Anzahl...</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">FAT12</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">... kleiner
+        0xFF5</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">FAT16</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">... kleiner
+        0xFFF5</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">FAT32</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">... größer
+        gleich 0xFFF5</font></td>
+    </tr>
+  </tbody></table>
+  </blockquote>
+  <p><font face="Verdana" size="2">Die Position des ersten Datensektors
+  berechnet sich folgender Maßen:</font></p>
+  <blockquote>
+    <pre><font color="#0000ff" face="Courier New" size="2">E<sub>rster_Datensektor </sub></font><font face="Courier New" size="2">=</font><font color="#0000ff" face="Courier New" size="2"> R<sub>eservierte_Sektoren </sub></font><font face="Courier New" size="2">+ </font><font color="#0000ff" face="Courier New" size="2">F<sub>AT_Sektoren </sub></font><font face="Courier New" size="2">+ </font><font color="#0000ff" face="Courier New" size="2">R<sub>oot_Verzeichnis_Sektoren</sub>&nbsp;&nbsp;</font></pre>
+  </blockquote>
+  <p><font face="Verdana" size="2">Zum umrechnen einer Cluster-Nummer aus der
+  FAT in eine Sektornummer kann man diese Formel verwenden:</font></p>
+  <blockquote>
+    <pre><font color="#0000ff" face="Courier New" size="2">S<sub>sektor_Position </sub></font><font face="Courier New" size="2">=</font><font color="#0000ff" face="Courier New" size="2"> E<sub>rster_Datensektor </sub></font><font face="Courier New" size="2">+ (</font><font color="#0000ff" face="Courier New" size="2"> C<sub>luster_Nummer </sub></font><font face="Courier New" size="2">- </font><font color="#0000ff" face="Courier New" size="2">2<sub> </sub></font><font face="Courier New" size="2">) * <font color="#0000ff">S</font></font><font color="#0000ff" face="Courier New" size="2"><sub>ektoren_je_Cluster</sub></font></pre>
+  </blockquote>
+</blockquote>
+<p>&nbsp;</p>
+<p><b><font color="#0000ff" face="Verdana"><a name="DIR"></a></font><font color="#808000" face="Verdana">Verzeichniseinträge</font></b></p>
+<blockquote>
+  <p><font face="Verdana" size="2">Jedes Verzeichnis besteht aus 32 Byte großen
+  Einträgen mit folgenden Aufbau:</font></p>
+<blockquote>
+  <table bgcolor="#ffffff" border="1" width="66%">
+    <tbody><tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2"><b>Offset</b></font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>Größe</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>Funktion</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x00</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">8
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Dateiname<br>
+        </font><font face="Verdana" size="1">Spezial Byte am Beginn:<br>
+        0x00 = Letzter Verzeichniseintrag<br>
+        0x05 = Das erste Byte ist das ASCII Zeichen 0xE5<br>
+        0xE5 = Der Eintrag wurde gelöscht</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x08</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">3
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Dateierweiterung&nbsp; </font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x0B</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Attribute&nbsp;<br>
+        </font><font face="Verdana" size="1">Bit 0 = Schreibgeschützt<br>
+        Bit 1 = Versteckt<br>
+        Bit 2 = System<br>
+        Bit 3 = Volume-Name<br>
+        Bit 4 = Verzeichnis<br>
+        Bit 5 = Archive<br>
+        Bei LongFileName-Einträgen steht hier 0x0F</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x0C</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Reserviert&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x0D</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Erstellungszeit
+        10tel Sekunde (0 bis 199)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x0E</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Erstellungszeit<br>
+        </font><font face="Verdana" size="1">Bit 0-4 : Sekunden (immer mit 2
+        dividiert)<br>
+        Bit 5-10 : Minute<br>
+        Bit 11-15 : Stunde<br>
+        Bit 16-20 : Tag<br>
+        Bit 21-24 : Monat<br>
+        Bit 25-31 : Jahre ab 1980</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x12</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Datum des
+        letzen Zugriffs (unbenutzt)<br>
+        </font><font face="Verdana" size="1">Bit 0-4 : Tag<br>
+        Bit 5-8 : Monat<br>
+        Bit 9-15 : Jahre ab 1980</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x14</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Erster Cluster
+        der Datei (high Word) nur für FAT32</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x16</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Zeit der letzen
+        Änderung<br>
+        </font><font face="Verdana" size="1">Bit 0-4 : Sekunden (immer mit 2
+        dividiert)<br>
+        Bit 5-10 : Minute<br>
+        Bit 11-15 : Stunde<br>
+        Bit 16-20 : Tag<br>
+        Bit 21-24 : Monat<br>
+        Bit 25-31 : Jahre ab 1980</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1A</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Erster Cluster
+        der Datei (low Word)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1C</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Größe der
+        Datei in Byte</font></td>
+    </tr>
+  </tbody></table>
+</blockquote>
+  <p><font face="Verdana" size="2">Lange Dateinamen werden aus aufeinander
+  folgenden spezial Einträgen zusammen gesetzt die diesen Aufbau haben:</font></p>
+<blockquote>
+  <table bgcolor="#ffffff" border="1" width="66%">
+    <tbody><tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2"><b>Offset</b></font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>Größe</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>Funktion</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x00</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Ordinal-Nummer</font><font face="Verdana" size="2"><br>
+        </font><font face="Verdana" size="1">Bit 0-5 = Nummer&nbsp; (von n bis 1)<br>
+        Bit 6&nbsp;&nbsp;&nbsp; = Erster Eintrag</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x01</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">10
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Die ersten 5
+        Namenszeichen (Unicode)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x0B</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">immer 0x0F</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x0C</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">immer 0&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x0D</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">1
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Checksumme vom
+        kurzen Dateinamen</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x0E</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">12
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Die nächsten 6
+        Namenszeichen (Unicode)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1A</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">2
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">immer 0&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1C</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Die nächsten 2
+        Namenszeichen (Unicode)</font></td>
+    </tr>
+  </tbody></table>
+</blockquote>
+  <p><font face="Verdana" size="2">Die </font><font face="Verdana" size="2">Checksumme
+  für den l</font><font face="Verdana" size="2">ange Dateinamen wird aus dem
+  kurzen Dateinamen berechnet:</font></p>
+  <blockquote>
+    <pre><font color="#0000ff" face="Courier New" size="2">for</font><font face="Courier New" size="2">(</font><font color="#0000ff" face="Courier New" size="2">cs</font><font face="Courier New" size="2">=</font><font color="#0000ff" face="Courier New" size="2">0</font><font face="Courier New" size="2">,</font><font color="#0000ff" face="Courier New" size="2">i</font><font face="Courier New" size="2">=</font><font color="#0000ff" face="Courier New" size="2">0</font><font face="Courier New" size="2">;</font><font color="#0000ff" face="Courier New" size="2">i</font><font face="Courier New" size="2">&lt;</font><font color="#0000ff" face="Courier New" size="2">13</font><font face="Courier New" size="2">;<font color="#0000ff">i</font>++)</font><font color="#0000ff" face="Courier New" size="2"> cs</font><font face="Courier New" size="2">=(</font><font color="#0000ff" face="Courier New" size="2">cs</font><font face="Courier New" size="2">&lt;&lt;</font><font color="#0000ff" face="Courier New" size="2">7</font><font face="Courier New" size="2">)+(</font><font color="#0000ff" face="Courier New" size="2">cs</font><font face="Courier New" size="2">&gt;&gt;</font><font color="#0000ff" face="Courier New" size="2">1</font><font face="Courier New" size="2">)+</font><font color="#0000ff" face="Courier New" size="2">name</font><font face="Courier New" size="2">[</font><font color="#0000ff" face="Courier New" size="2">i</font><font face="Courier New" size="2">];&nbsp;</font></pre>
+  </blockquote>
+  <p align="justify"><font face="Verdana" size="2">Ein langer Dateiname wird immer vor einen </font><font face="Verdana" size="2">
+  kurzen Dateinamen gespeichert. Er wird aus einem oder mehreren spezial
+  Einträgen zusammengesetzt.&nbsp; Beim ersten Eintrag wird die </font><font face="Verdana" size="2">Ordinal-Nummer
+  auf die Anzahl der Einträge gesetzt, und das 6.te Bit auf eins gesetzt. Jeder
+  Eintrag enthält 13 Buchstaben im Unicode-Format. Der Dateiname wird dabei von
+  hinten nach vorn zusammen gesetzt. Das heißt im ersten Eintrag stehen die
+  letzen 13 Buchstaben des Namens. Wenn die </font><font face="Verdana" size="2">Checksumme
+  nicht mehr mit der des </font><font face="Verdana" size="2">
+  kurzen Dateinamens übereinstimmt, so ist der lange Dateiname ungültig.</font></p>
+</blockquote>
+
+<p><b><font color="#0000ff" face="Verdana"><a name="INFO"></a></font><font color="#808000" face="Verdana">Der Infosektor</font></b></p>
+<blockquote>
+  <p><font face="Verdana" size="2">Beim FAT32 Format kann ein Infosektor der
+  Partition hinzugefügt werden. Dieser hat folgenden Aufbau:</font></p>
+<blockquote>
+  <table bgcolor="#ffffff" border="1" width="66%">
+    <tbody><tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2"><b>Offset</b></font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2"><b>Größe</b></font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2"><b>Funktion</b></font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x000</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Signatur 1
+        (immer </font><font face="Verdana" size="2">0x41615252</font><font face="Verdana" size="2">)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x004</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">480
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">reserviert&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1E4</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Signatur 2
+        (immer </font><font face="Verdana" size="2">0x61417272)</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1E8</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Anzahl der
+        freien Cluster</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1EC</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Position des
+        nächsten freien Clusters</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1F0</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">12
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">reserviert&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="12%"><font face="Verdana" size="2">0x1FC</font></td>
+      <td align="center" valign="top" width="16%"><font face="Verdana" size="2">4
+        Byte</font></td>
+      <td valign="top" width="72%"><font face="Verdana" size="2">Signatur 3
+        (immer 0xAA550000</font><font face="Verdana" size="2">)</font></td>
+    </tr>
+  </tbody></table>
+</blockquote>
+  <p><font face="Verdana" size="2">Die Position des Infosektors wird relativ zum
+  Anfang der Partition berechnet.</font></p>
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+</blockquote>
+
+</body></html>

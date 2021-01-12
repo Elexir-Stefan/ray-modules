@@ -1,0 +1,126 @@
+#!/bin/sh
+
+NAMEFROM=module.name
+STATICFROM=static.parts
+CC=gcc
+LD=ld
+INCLUDEDIR=../../kernel/include
+KSTAT_DIR=../../kcall_static
+OUTFILE=Makefile
+DEBUG=0
+
+if [ -r $NAMEFROM ]
+then
+	MODFILE=`cat $NAMEFROM`
+else
+	echo -e "File '$NAMEFROM' needed to read module name from not found. Aborting."
+	exit 1
+fi
+
+if [ -r $STATICFROM ]
+then
+	STATFILES=`cat $STATICFROM`
+else
+	echo -e "File '$STATICFROM' needed to read parts that will be staticly compiled into the module $MODFILE."
+	exit 1
+fi
+	
+
+
+
+STATFILES="$STATFILES
+standard/standard"
+
+for STATICFILE in $STATFILES
+do
+	STATICS="$STATICS $KSTAT_DIR/$STATICFILE.o"
+done
+
+
+if [ $DEBUG == 1 ]
+then
+	DEFS="-g3"
+	OPT=0
+else
+	DEFS=""
+	OPT=2
+fi
+
+C_ARGS="$DEFS -I$INCLUDEDIR -O$OPT -m32 -c -nostartfiles -fno-common -ffreestanding -Wall -Werror -fno-ident -fno-stack-protector"
+
+#echo -e " ========== GENERATING MAKEFILE ============"
+#echo -e " include dir: $INCLUDEDIR"
+#echo -e " CC args: $C_ARGS"
+#echo -e " ==========================================="
+	
+
+
+echo -e "# NURNware Ray kernel module $MODFILE">$OUTFILE
+echo -e "# (For use with Cold iGnition operating system)">>$OUTFILE
+echo -e "# Copyright (C) 2007 - NURNware Technologies">>$OUTFILE
+echo -e "\n">>$OUTFILE
+
+# Variables
+echo -e "CC=$CC">>$OUTFILE
+echo -e "C_ARGS=$C_ARGS">>$OUTFILE
+echo -e "LD=$LD">>$OUTFILE
+echo -e "\n">>$OUTFILE
+
+echo -e "all: $MODFILE">>$OUTFILE
+echo -e "\n">>$OUTFILE
+
+echo -e "clean:">>$OUTFILE
+# echo -e "\t@echo -e \"Deleting all object files...\"">>$OUTFILE
+echo -e "\t@-rm \`find . -iname '*.o'\`>/dev/null">>$OUTFILE
+echo -e "\n">>$OUTFILE
+
+echo -e "rebuild: clean $MODFILE">>$OUTFILE
+echo -e "\n">>$OUTFILE
+
+
+CFILES=0
+ISERR=0
+    for CURFILE in *.[cS]
+    do
+	if [ $ISERR == "0" ]
+	then
+		if [[ "$CURFILE" = *.c ]]
+		then
+			OBJFILE=${CURFILE%.c}.o
+		else
+			if [[ "$CURFILE" = *.S ]]
+			then
+				OBJFILE=${CURFILE%.S}.o
+			else
+				OBJFILE=""
+			fi
+		fi
+		# echo -e "\t Getting headers for $CURFILE..."
+		HEADERS=`$CC $C_ARGS $CURFILE -M -MT $OBJFILE`
+    		if [ $? != "0" ]
+		then
+		    ISERR=1
+		fi
+
+		echo -e "$HEADERS">>$OUTFILE
+		echo -e "\t@echo -e \"\t SUBPART OF MODULE [$CURFILE]\"">>$OUTFILE
+		echo -e "\t@\$(CC) \$(C_ARGS) $CURFILE -o $OBJFILE">>$OUTFILE
+		echo -e "\n">>$OUTFILE
+
+		ALLFILES="$ALLFILES $CURFILE"
+		OBJECTS="$OBJECTS $OBJFILE"
+
+	else
+	    echo -e "Aborting $CURFILE due to errors."
+	fi
+
+	CFILES=`expr $CFILES + 1`
+    done
+
+echo -e "$MODFILE: $OBJECTS">>$OUTFILE
+echo -e "\t@echo -e \"Building module $MODFILE\"">>$OUTFILE
+echo -e "\t@\$(LD) -z max-page-size=4096 -o $MODFILE $OBJECTS $STATICS -T raymodule.ld">>$OUTFILE
+
+if [ $ISERR != "0" ]; then
+	echo -e "There were errors generating the Makefile!"
+fi

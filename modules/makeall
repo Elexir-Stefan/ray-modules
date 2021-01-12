@@ -1,0 +1,37 @@
+#!/bin/sh
+
+DIRS=`cat allmodules.names`
+
+echo -e "Generating Makefiles..."
+
+if [ "$1" == "refresh" ]
+then
+
+	for MODULE in $DIRS
+	do
+		pushd $MODULE>/dev/null
+		./mkmake
+		if [ $? != 0 ]; then
+		    popd>/dev/null
+		    exit -1
+		fi
+		
+		popd
+	done
+fi
+
+if [ "$1" == "norebuild" ]
+then
+    REBUILD=
+else
+    REBUILD=rebuild
+fi
+
+for MODULE in $DIRS
+do
+	make -C $MODULE $REBUILD --no-print-directory
+	if [ $? != 0 ]; then
+	    exit -1
+	fi
+done
+

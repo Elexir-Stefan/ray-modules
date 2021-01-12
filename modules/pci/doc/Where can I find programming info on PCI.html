@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Language" content="en">
+<meta name="robots" content="index,follow">
+<meta name="description" content="The PCI documentation tells us how one can list the PCI hardware (both extension card and built-in components such as hard drive controllers, PCI-to-PCMCIA bridges, etc.) and what resources that hardware use for communication with the CPU. However, how you should use those resources to program the hardware depends on the very hardware you try to program (i.e. PCI has no info about how AC97 pci soundcard works: it can just tell you that it is a soundcard and that it will use memory-mapped region [ 0x1234..0x5678 ] and interrupt 10 to communicate with you.">
+<meta name="keywords" content="Where can I find programming info on PCI?, OsFaqWiki">
+<meta name="language" content="en">
+<meta name="document-type" content="Public">
+<meta name="document-rating" content="General">
+<meta name="generator" content="PhpWiki">
+<meta name="PHPWIKI_VERSION" content="1.3.13">
+<!-- base href="http://www.osdev.org/osfaq2/index.php/" -->
+<link rel="shortcut icon" href="http://www.osdev.org/osfaq2/themes/default/images/favicon.ico">
+<link rel="home" title="HomePage" href="http://www.osdev.org/osfaq2/index.php/HomePage">
+<link rel="help" title="HowToUseWiki" href="http://www.osdev.org/osfaq2/index.php/HowToUseWiki">
+<link rel="copyright" title="GNU General Public License" href="http://www.gnu.org/copyleft/gpl.html#SEC1">
+<link rel="author" title="The PhpWiki Programming Team" href="http://phpwiki.org/ThePhpWikiProgrammingTeam">
+<link rel="search" title="FindPage" href="http://www.osdev.org/osfaq2/index.php/FindPage">
+<link rel="alternate" title="View Source: Where can I find programming info on PCI?" href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=viewsource&amp;version=17">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="http://www.osdev.org/osfaq2/index.php/RecentChanges?format=rss">
+<link rel="bookmark" title="SandBox" href="http://www.osdev.org/osfaq2/index.php/SandBox">
+<link rel="bookmark" title="WikiWikiWeb" href="http://www.osdev.org/osfaq2/index.php/WikiWikiWeb">
+
+<link rel="stylesheet" type="text/css" charset="iso-8859-1" href="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/phpwiki.css">
+<link rel="stylesheet" type="text/css" charset="iso-8859-1" href="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/phpwiki-printer.css" media="print">
+<link rel="alternate stylesheet" type="text/css" charset="iso-8859-1" href="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/phpwiki-printer.css" title="Printer">
+<link rel="alternate stylesheet" type="text/css" charset="iso-8859-1" href="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/phpwiki-topbottombars.css" title="Top &amp; bottom toolbars">
+<link rel="alternate stylesheet" type="text/css" charset="iso-8859-1" href="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/phpwiki-modern.css" title="Modern"><title>OsFaqWiki - Where can I find programming info on PCI?</title>
+
+<script type="text/javascript" src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/mobrowser.js"></script>
+<script type="text/javascript" src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/modomevent.js"></script>
+<script type="text/javascript" src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/modomt.js"></script>
+<script type="text/javascript" src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/modomext.js"></script>
+<script type="text/javascript" src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/getobject2.js"></script>
+<script type="text/javascript" src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/xmlextras.js"></script>
+<script type="text/javascript" src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/acdropdown.js"></script>
+<style>
+  @import url( /osfaq2/themes/default/moacdropdown/css/dropdown.css );
+</style>
+<script type="text/javascript">
+<!--//
+var xmlrpc_url = '/osfaq2/RPC2.php'
+// --></script></head><body>
+
+<div id="header">
+  <!-- The logo -->
+<div id="logo"><a class="wikilink" href="http://www.osdev.org/osfaq2/index.php/HomePage" target="_top"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/logo.png" id="logo-img" alt="OsFaqWiki: HomePage" align="right" border="0"></a></div>
+<!-- The top navigation/search bar -->
+<div class="toolbar">
+  <!-- The top navigation/search bar -->
+<form action="TitleSearch" target="_top" method="get" accept-charset="iso-8859-1">
+<div id="navbuttons">
+<a href="http://www.osdev.org/osfaq2/index.php/RecentChanges" class="wiki">RecentChanges</a>
+ | <a href="http://www.osdev.org/osfaq2/index.php/FindPage" class="wiki">FindPage</a>&nbsp;<input name="auto_redirect" value="1" type="hidden">
+<input name="s" size="12" maxlength="256" title="Quick Search" onmouseover="window.status='Quick Search'; return true;" onmouseout="window.status=''; return true;" type="text">
+
+ | <a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=LikePages" class="wiki">LikePages</a>
+ | <a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=BackLinks" class="wiki">BackLinks</a></div>
+</form>
+  </div>
+
+<!-- Page title -->
+<h1><a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=BackLinks" class="backlinks" title="BackLinks for Where can I find programming info on PCI?" onmouseover='window.status="BackLinks for Where can I find programming info on PCI?"; return true;' onmouseout="window.status='';return true;">Where can I find programming info on PCI?</a></h1>
+</div>
+<div id="content">
+
+
+
+<div class="wikitext"><h2>Web resources</h2>
+<p class="tightenable">The official PCI web site is located at www.pcisig.com</p>
+<p class="tightenable">This PCI Special Interest Group site contains a
+little information on PCI as Microsoft Word 6 document files which are
+the official specifications, it also contains a few test/diagnostic
+programs in C for working with PCI that you can download and also they
+keep a list of Vendor ID numbers but not product ID numbers.</p>
+<ul><li class="tightenable">Craig "Merlin" Hart's PCI page <a href="http://members.datafast.net.au/dft0802/" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">http://members.datafast.net.au/dft0802/</span></a></li>
+<li class="tightenable">Jim Boemler's PCI page http://www.halcyon.com/scripts/jboemler/pci/pcicode looks broken and finally points to <a href="http://www.pcidatabase.com/" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">http://www.pcidatabase.com/</span></a></li>
+<li class="tightenable"><a href="http://www.osdev.org/osfaq2/index.php/RalfBrown" class="wiki">RalfBrown</a>'s page <a href="http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">http://www.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html</span></a></li>
+<li class="tightenable">Christopher Griese's page <a href="http://my.execpc.com/%7Egeezer/osd/pnp/index.htm" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">http://my.execpc.com/~geezer/osd/pnp/index.htm</span></a>, which includes code snippets for both direct, BIOS16 and BIOS32 access to PCI configuration.</li>
+<li class="tightenable">The Linux Documentation Project has a very nice
+guide which give you a quick overview of how PCI devices can be
+enumerated and identified. <a href="http://www.tldp.org/LDP/tlk/dd/pci.html" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">http://www.tldp.org/LDP/tlk/dd/pci.html</span></a>, mirrored <a href="http://clicker.sourceforge.net/docs/teacup/pcidoc/PCI-hardware-overview-draft.html" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">here</span></a>.</li>
+</ul>
+<h3>Recommended books on PCI Programming</h3>
+<p class="tightenable top">The two books below are based on the PCI
+spec and supply much information about device types, interrupt
+rerouting, Hot-plug /Power management specs etc.</p>
+<pre class="tightenable">PCI System Architecture - from Mindshare Inc
+                          by Tom Shanley and Don Anderson
+                          ISBN 0-201-30974-2 ($US 40 in 2004)
+                          publisher Addison Wesley
+
+PCI-X System Architecture - from Mindshare Inc
+                          by Tom Shanley
+                          ISBN 0-201-72682-3 ($US 45 in 2004)
+                          publisher Addison Wesley</pre>
+<h3>What can i expect from the PCI docs ?</h3>
+<p class="tightenable">The PCI documentation tells us how one can list
+the PCI hardware (both extension card and built-in components such as
+hard drive controllers, PCI-to-PCMCIA bridges, etc.) and what resources
+that hardware use for communication with the CPU. However, how you
+should use those resources to program the hardware depends on the very
+hardware you try to program (i.e. PCI has no info about how AC97 pci
+soundcard works: it can just tell you that it is a soundcard and that
+it will use memory-mapped region [ 0x1234..0x5678 ] and interrupt 10 to
+communicate with you.</p>
+<h3>Do I have to pay $xxx for an open-standard specification</h3>
+<p class="tightenable">Official PCI documents (PCI_Local_Bus_Spec_v2.x.pdf) unfortunately come at a high fee. Free-pirate hosting links are <b>not</b> welcome here (of course).
+Before ordering the documents, keep in mind that they're describing the <b>whole</b>
+standard, not just the programming information you need. That means
+you'd end up with a 300+ pages hard-cover book full of electric &amp;
+mechanics specifications, bus timing, burst frame structure etc. which
+are completely meaningless for you.</p>
+<hr>
+<h2>What should a 'PCI core' component offer ?</h2>
+<h3>Primitives for accessing configuration space</h3>
+<dl><dt class="tightenable bottom">Quoting 'PCICFG.TXT' from <a href="http://www.osdev.org/osfaq2/index.php/RalfBrown" class="wiki">RalfBrown</a> PCI utility</dt>
+<dd class="tightenable top"><em>PCI devices have an address which is
+broken down into a PCI-bus number (usually 0), a device number within
+that bus (0-31), and a function number within the device (0-7).</em> (...)
+<em>There are two incompatible methods for accessing the ports; on most
+chipsets, -b1 is the proper method ("PCI Configuration Space Access
+Mechanism #1"). On some chipsets (mostly the earliest ones supporting
+PCI), you will need to use -b2 ("PCI Configuration Space Access
+Mechanism #2"). USING THE INCORRECT METHOD CAN HANG OR RESET YOUR
+COMPUTER!</em>, which explains why using BIOS service for accessing PCI makes sense ...</dd>
+</dl>
+<p class="tightenable">Configuration mode 2 is deprecated, afaik, so it won't be covered here. The following code snippet (under <a href="http://www.osdev.org/osfaq2/index.php/RalfBrown" class="wiki">RalfBrown</a> tutorial license ;) reads the value
+of register <tt>reg</tt> on <tt>bus:device:func</tt> pci space. Accessing a datum in PCI mechanism 1 consist of sending its 'address' on port <tt>0xCF8</tt> and then either reading or writing the value through port <tt>0xcfc</tt>.</p>
+<pre class="tightenable">    DWORD addr = 0x80000000L | (((DWORD)(bus &amp; 0xFF)) &lt;&lt; 16) |
+                      ((((unsigned)device) &amp; 0x1F) &lt;&lt; 11) |
+                      ((((unsigned)func) &amp; 0x07) &lt;&lt; 8) | (reg &amp; 0xFC) ;
+         DWORD orig = inp(0xCF8) ;      // get current state
+         outpd(0xCF8,addr) ;            // set up addressing to config data
+         value = inpd(0xCFC) ;          // get requested DWORD of config data
+         outpd(0xCF8,orig) ;            // restore configuration control</pre>
+<blockquote class="tightenable"><p class="tightenable top bottom"><em>note: PCI bios interface do have them</em></p>
+</blockquote>
+<h3>Bus enumeration</h3>
+<p class="tightenable bottom">There are two possible approach for device/driver handling:</p>
+<dl><dt class="tightenable top"><strong>driver push</strong></dt>
+<dd class="tightenable bottom">the user tells the system to use the
+driver and the system check there's a device here. This check requires
+that you scan devices, looking for a specific vendor/subclass.</dd>
+<dt class="tightenable top"><strong>driver pull</strong></dt>
+<dd class="tightenable">the system scans for devices and loads drivers for devices that exists.</dd>
+</dl>
+<p class="tightenable bottom">So in both approach, enumeration is required. The basics of devices enumeration consists of <i>probing</i> each bus:device:function in the configuration space and see if we have something consistent.</p>
+<ul><li class="tightenable top">if the device does not exists, reading the <tt>PCI_VENDORID field (word at 0x00) will return either <tt>0x0000</tt> or =0xffff</tt>, which are both invalid vendors.</li>
+<li class="tightenable">if the device exists and has only one function, the <tt>PCI_HEADER_TYPE</tt> (byte at 0x0E) will have it's highest bit cleared.</li>
+<li class="tightenable">if the device exists and has multiple functions, the <tt>PCI_HEADER_TYPE</tt> has its highest bit set. In that case, the scan is repeated for all the 8 functions</li>
+<li class="tightenable">There is a maximum of 8 PCI busses. Initially, the scan starts on bus #0. Some devices may act as <i>bridges</i>. This can be detected because <tt>PCI_HEADER_TYPE</tt> has the value 1. Bridges have a byte at <tt>0x1a</tt> that tells the highest bus number behind the bridge.</li>
+</ul>
+<p class="tightenable">Note that devices does not necessarily have
+contiguous numbers. E.g. a bus may have device 4 present even if there
+are no devices 1, 2, or 3. This is especially common on the bus #0 due
+to on-chip devices.</p>
+<pre class="tightenable">
+// disclaimer: this is untested code summarizing
+// http://my.execpc.com/~geezer/osd/pnp/pci32.c
+
+// it doesn't take pci-to-pci bridges into account
+// and blindly scans all the possible busses.
+
+
+int nb_bus=1;
+
+for (bus=0;bus&lt;nb_bus;bus++) {
+  for (dev=0;dev&lt;64;dev++) {
+    byte htype=pciGetCfgByte(bus,dev,fn,PCI_HEADER_TYPE);
+    word vendor_id=pciGetCfgWord(bus,dev,0,PCI_VENDORID);
+    int nbfuncs=1;
+
+    if (vendor_id==0 || vendor_id==0xffff) continue;
+    if (htype &amp; 0x80) nbfuncs=8;
+
+    for (fn=0;fn&lt;nbfuncs;fn++) {
+
+      /** we have a device. Get vendor (0x00:2), product (0x02:2), class (0x09:3)
+       *  information and create a DeviceNfo with it for later retrieval
+       *  Don't forget to insert bus:dev:fn in the DeviceNfo so that we don't need
+       *  to bother with enumeration again
+       */
+    }
+  }
+}</pre>
+<h3>Primitives for decoding BARs</h3>
+<p class="tightenable">Address registers (telling what memory range or I/O range is used by the device) may not be immediate to use. According to <a href="http://www.acm.uiuc.edu/sigops/roll_your_own/7.c.html" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">sigops's</span> chapter</a>,
+the lowest bit you read will tell you if you're facing memory (e.g.
+bit0==0) or IO resource (e.g. bit0==1). You can tell the size of the
+region by writing <tt>0xffffffff</tt> in the BAR and reading back. Once you're done, don't forget to write back the old value.</p>
+<pre class="tightenable">void pciDecodeBar(pci_device* pci, pci_bar_register bar)
+{
+   unsigned type = pciReadDword(pci, bar) &amp; 0x0f;
+   unsigned addr = pciReadDword(pci, bar) &amp; ~0x0f;
+   unsigned size;
+
+   pciWriteDword(pci, bar, 0xffffffff);
+   size = pciReadDword(pci, bar) &amp; 0xfffffff0;
+   pciWriteDword(pci, bar, addr|type);
+
+   size = 1 + ~size;
+
+   kprint(((type&amp;1)?"memory %8x..%8x, %s":"i/o %4x..%4x"),
+          addr,addr+size,(type&amp;8)?"prefetchable":"no prefetch");
+}</pre>
+<h3>``BARs'' ? You mean i should go for a drink ?</h3>
+<p class="tightenable">For auto-configuration, PCI has has a special
+space called "PCI Configuration Space". This space is accessed using
+I/O ports. There's 2 different configuration space access mechanisms,
+but for the most common one you set the address in one I/O port (the
+bus, device, function and offset) and read or write the data in another
+I/O port.</p>
+<p class="tightenable">Anyway, in each PCI device's configuration space
+there's normally one or more BARs (or "Base Address Registers"), which
+can be used to set or find the address (in physical memory or in I/O
+space) for each resource the card uses.</p>
+<p class="tightenable">The BARs could be used for memory mapped I/O, I/O port ranges and/or a boot ROM.</p>
+<p class="tightenable">They aren't used for IRQs though - there's
+different fields in PCI configuration space for that, one for the
+interrupt line the card uses (which is a fixed/static flag) and another
+for which IRQ it is routed to (which is set by the BIOS during boot,
+and only exists as a means to pass this information to operating
+systems - the hardware itself ignores it).</p>
+<hr>
+<p class="tightenable top bottom">Categories: <a href="http://www.osdev.org/osfaq2/index.php/CollectedKnowledge" class="wiki">CollectedKnowledge</a>, <a href="http://www.osdev.org/osfaq2/index.php/HardWareBus" class="wiki">HardWareBus</a></p>
+<hr>
+<h4>related threads</h4>
+<p class="tightenable"><a href="http://www.mega-tokyo.com/forum/index.php?board=1;action=display;threadid=5292" class="named-interwiki"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/interwiki.png" alt="" class="linkicon" border="0">PCI</span> related</a>
+, <a href="http://www.mega-tokyo.com/forum/index.php?board=1;action=display;threadid=5346" class="named-interwiki"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/interwiki.png" alt="" class="linkicon" border="0">calling</span> BIOS32 service</a>, <a href="http://www.mega-tokyo.com/forum/index.php?board=1;action=display;threadid=5482" class="named-interwiki"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/interwiki.png" alt="" class="linkicon" border="0">finding</span> PCI device</a>, <a href="http://www.mega-tokyo.com/forum/index.php?board=7;action=display;threadid=6807;start=0" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">Clicker</span> 0.8.20 -- pci</a></p>
+<p class="tightenable">most of the links posted on these threads looks broken, though (unfortunately)</p>
+<h4>additionnal material</h4>
+<ul><li class="tightenable top bottom"><a href="http://www.cs.cmu.edu/ralf/pub-files/rbpci119.zip" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">http://www.cs.cmu.edu/ralf/pub-files/rbpci119.zip</span></a></li>
+<li class="tightenable top bottom"><a href="http://www.acm.uiuc.edu/sigops/roll_your_own/7.c.0.html" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">http://www.acm.uiuc.edu/sigops/roll_your_own/7.c.0.html</span></a></li>
+<li class="tightenable top"><a href="http://cvs.sourceforge.net/viewcvs.py/clicker/c32-lxsdk/kernel/src/mods/io/pci/pcicore.c?view=markup" target="" class="namedurl"><span style="white-space: nowrap;"><img src="Where%20can%20I%20find%20programming%20info%20on%20PCI-Dateien/http.png" alt="" class="linkicon" border="0">whyme's</span> pci driver for Clicker32</a></li>
+</ul>
+<p class="tightenable bottom">there was an article called "pentium_vme_article.pdf" formerly on the Web, but it disappeared. <a href="http://www.osdev.org/osfaq2/index.php/PciSectionOfPentiumVme" class="wiki">PciSectionOfPentiumVme</a> is revived here ...</p>
+</div>
+
+<div id="footer">  <hr class="printer" noshade="noshade">
+<p class="editdate">  Last edited on June 15, 2006  3:25 pm by "The PhpWiki programming team"</p>
+<hr class="toolbar" noshade="noshade">
+<div class="toolbar">
+<table summary="Toolbar 1: Page actions and user login." border="0" cellpadding="0" cellspacing="0" width="100%">
+<tbody><tr valign="baseline">
+  <td>
+  <div id="actionbuttons">
+          <a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=edit" class="wikiadmin" rel="nofollow">Edit</a>              
+ | <a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=lock" class="wikiadmin">Lock Page</a>              
+ | <a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=revert&amp;version=16" class="wikiadmin">Revert</a>      
+ | <a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=remove" class="wikiadmin">Remove Page</a>        
+ | <a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=PageHistory" class="wikiaction">PageHistory</a>    
+ | <a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=diff" class="wikiaction" rel="nofollow">Diff</a> 
+    
+ | <a href="http://www.osdev.org/osfaq2/index.php/Where%20can%20I%20find%20programming%20info%20on%20PCI%3F?action=PageInfo" class="wikiaction">PageInfo</a>  </div>
+  </td>
+  <td align="right" valign="top">
+    <div id="signin">  <form method="post" action="Where%20can%20I%20find%20programming%20info%20on%20PCI%3F" accept-charset="iso-8859-1" name="signin">
+  <input name="pagename" value="Where can I find programming info on PCI?" type="hidden"><input name="action" value="browse" type="hidden">  <script type="text/javascript">
+<!--//
+function SignIn(form,userid) {
+      if (userid) {
+        form.elements["auth[userid]"].value = userid;
+      }
+      form.submit();
+    }
+// --></script>
+  <input value="Sign in as:" name="auth[login]" class="wikiaction" type="submit">  <input name="auth[userid]" size="12" maxlength="256" onchange="SignIn(this.form,false);" title="Enter your UserId to sign in" onmouseover='window.status="Enter your UserId to sign in"; return true;' onmouseout="window.status='';return true;" type="text">  </form>
+</div>
+  </td>
+</tr>
+</tbody></table>
+</div>
+</div>
+
+</div>
+<!-- Add your Disclaimer here -->
+<div class="hint"><p>Notice: "Array to string conversion"  (...repeated 9 times)</p>
+</div>
+</body></html>

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+TEMPLATEFOLDER=template
+
+if [ $# != 1 ]
+then
+    echo -e " -------------------------------------------------"
+    echo -e "|         NURNware RAY Kernel Development         |"
+    echo -e "--------------------------------------------------"
+    echo -e "| Used to create a new module and add it to       |"
+    echo -e "| SVN repository.                                 |"
+    echo -e " -------------------------------------------------"
+    echo -e "USAGE: new modulename"
+    echo -e "modulename\tName of the module to create"
+else
+    # Do not use cp -R to avoid copying .svn
+    mkdir $1
+    pushd $TEMPLATEFOLDER
+    for TEMPLATE in *
+    do
+	    cp $TEMPLATE ../$1/$TEMPLATE
+	    
+    done
+    
+    popd
+
+    mv $1/template.c $1/$1.c
+    echo -e $1>$1/module.name
+    svn add $1
+    echo -e "Created new module $1"
+fi

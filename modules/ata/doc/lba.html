@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><title>Bona Fide OS Development - Pagetables</title>
+
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="keywords" content="osdev,os development, os design, operating system, tutorial, documents,  bochs, x86, intel, docs, system programming, programming, forum, chat">
+<meta name="description" content="The place to go for OS Development related research. IRC Chat, Forum, Tutorials, Documents, &amp; Downloads.">
+<link href="lba-Dateien/style.css" rel="stylesheet" type="text/css"></head><body>
+
+<div id="header">
+<table cellpadding="0" cellspacing="0" width="100%">
+<tbody><tr>
+	<td><a href="http://www.osdever.net/" style="border: 0px none ;"><img src="lba-Dateien/bflogo.png" alt="BonaFide OS Development" border="0"></a></td>
+	<td align="center"><script type="text/javascript"><!--
+google_ad_client = "pub-5517142326360907";
+google_alternate_color = "FFFFFF";
+google_ad_width = 468;
+google_ad_height = 15;
+google_ad_format = "468x15_0ads_al";
+google_ad_channel ="5627983059";
+google_color_border = "FFFFFF";
+google_color_bg = "FFFFFF";
+google_color_link = "000000";
+google_color_url = "FFFFFF";
+google_color_text = "000000";
+//--></script>
+<script type="text/javascript" src="lba-Dateien/show_ads.js">
+</script>
+	</td>
+</tr>
+</tbody></table>
+</div>
+<div id="topmenu">
+<ul>
+<li><a href="http://www.osdever.net/index.php" title="BF Home Page"> BF Home</a></li>
+<li><a href="http://www.osdever.net/goal.php" title="BF's Goal">The Goal </a></li>
+<li><a href="http://www.osdever.net/help.php" title="How you can Help BF">How to Help </a></li>
+<li><a href="http://www.osdever.net/contributors.php" title="Those that have donated to BF">Contributors</a></li>
+<li><a href="http://www.osdever.net/contact.php" title="Email us">Contact BF </a></li>
+</ul>
+</div>
+    
+	 <ul>
+        <li><a href="http://www.osdever.net/tutorials.php?cat=0&amp;sort=1"><img alt="[Tuts]" src="lba-Dateien/tuts.png" border="0" height="16" width="16"> Tutorials </a></li>
+        <li><a href="http://www.osdever.net/documents.php?cat=0&amp;sort=1"><img alt="[Docs]" src="lba-Dateien/docs.png" border="0" height="16" width="16"> Documents </a></li>
+        <li><a href="http://www.osdever.net/downloads.php"><img alt="[DLs]" src="lba-Dateien/dl.png" border="0" height="16" width="16"> Downloads </a></li>
+        <li><a href="http://www.osdever.net/books.php"><img alt="[Books]" src="lba-Dateien/books.png" border="0" height="16" width="16"> Books </a></li>
+        <li><a href="http://www.osdever.net/links.php"><img alt="[Links]" src="lba-Dateien/links.png" border="0" height="16" width="16"> Links </a></li>
+        <li><a href="http://www.osdever.net/search/"><img alt="[Search]" src="lba-Dateien/search.png" border="0" height="16" width="16"> Search </a></li>
+	<li><a href="http://www.frappr.com/osdever"><img alt="[frappr]" src="lba-Dateien/forum.png" border="0" height="16" width="16"> Frappr Map</a></li>
+	<li><a href="http://www.osdever.net/chat.php"><img alt="[frappr]" src="lba-Dateien/chat.png" border="0" height="16" width="16"> Chat</a></li>
+</ul>
+<table class="menu" cellpadding="0" cellspacing="3" width="150"><tbody><tr>
+<td>
+		 <center>
+<script type="text/javascript"><!--
+google_ad_client = "pub-5517142326360907";
+google_ad_width = 120;
+google_ad_height = 600;
+google_ad_format = "120x600_as";
+google_ad_type = "text_image";
+google_ad_channel ="4954342782";
+google_color_border = ["000000","333333"];
+google_color_bg = ["FFFFFF","000000"];
+google_color_link = ["333333","FFFFFF"];
+google_color_url = ["FFFFFF","999999"];
+google_color_text = ["000000","CCCCCC"];
+//--></script>
+<script type="text/javascript" src="lba-Dateien/show_ads.js">
+</script>
+		 </center>
+</td></tr>
+     </tbody></table>
+	
+    
+     <table class="main" border="0" cellpadding="15" height="100%" width="100%">
+      <tbody><tr>
+       <td valign="top"><h1 class="western" align="center">LBA HDD Access via PIO</h1>
+<p align="left">  Every operating system will eventually find a need
+for reliable, long-term storage. There are only a handful of commonly
+used storage devices:</p>
+<ul>
+	<li><p align="left">Floppy</p>
+	</li><li><p align="left">Flash media</p>
+	</li><li><p align="left">CD-ROM</p>
+	</li><li><p align="left">Hard drive</p>
+</li></ul>
+<p align="left">  Hard drives are by far the most widely used mechanism
+for data storage, and this tutorial will familiarize you with a
+practical method for accessing them. In the past, a method known as
+CHS was used. With CHS, you specified the cylinder, head, and sector
+where your data was located. The problem with this method is that the
+number of cylinders that could be addressed was rather limited. To
+solve this problem, a new method for accessing hard drives was
+created: Linear Block Addressing (LBA). With LBA, you simply specify
+the address of the block you want to access. Blocks are 512-byte
+chunks of data, so the first 512 bytes of data on the disk are in
+block 0, the next 512 bytes are in block 1, etc. This is clearly
+superior to having to calculate and specify three separate bits of
+information, as with CHS. However, there is one hitch with LBA. There
+are two forms of LBA, which are slightly different: LBA28 and LBA48.
+LBA28 uses 28 bits to specify the block address, and LBA48 uses 48
+bits. Most drives support LBA28, but not all drives support LBA48. In
+particular, the Bochs emulator supports LBA28, and not LBA48. This
+isn't a serious problem, but something to be aware of. Now that you
+know how LBA works, it's time to see the actual methods involved.</p>
+<p align="left">To read a sector using LBA28:</p>
+<ol>
+	<li><p align="left">Send a NULL byte to port 0x1F1: outb(0x1F1, 0x00);</p>
+	</li><li><p align="left">Send a sector count to port 0x1F2: outb(0x1F2,
+	0x01);</p>
+	</li><li><p align="left">Send the low 8 bits of the block address to port
+	0x1F3: outb(0x1F3, (unsigned char)addr);</p>
+	</li><li><p align="left">Send the next 8 bits of the block address to port
+	0x1F4: outb(0x1F4, (unsigned char)(addr &gt;&gt; 8);</p>
+	</li><li><p align="left">Send the next 8 bits of the block address to port
+	0x1F5: outb(0x1F5, (unsigned char)(addr &gt;&gt; 16);</p>
+	</li><li><p align="left">Send the drive indicator, some magic bits, and
+	highest 4 bits of the block address to port 0x1F6: outb(0x1F6, 0xE0
+	| (drive &lt;&lt; 4) | ((addr &gt;&gt; 24) &amp; 0x0F));</p>
+	</li><li><p align="left">Send the command (0x20) to port 0x1F7: outb(0x1F7,
+	0x20);</p>
+</li></ol>
+<p align="left">To write a sector using LBA28:</p>
+<p align="left">  Do all the same as above, but send 0x30 for the
+command byte instead of 0x20: outb(0x1F7, 0x30);</p>
+<p align="left">To read a sector using LBA48:</p>
+<ol>
+	<li><p align="left">Send two NULL bytes to port 0x1F1: outb(0x1F1,
+	0x00); outb(0x1F1, 0x00);</p>
+	</li><li><p align="left">Send a 16-bit sector count to port 0x1F2:
+	outb(0x1F2, 0x00); outb(0x1F2, 0x01);</p>
+	</li><li><p align="left">Send bits 24-31 to port 0x1F3: outb(0x1F3,
+	(unsigned char)(addr &gt;&gt; 24));</p>
+	</li><li><p align="left">Send bits 0-7 to port 0x1F3: outb(0x1F3, (unsigned
+	char)addr);</p>
+	</li><li><p align="left">Send bits 32-39 to port 0x1F4: outb(0x1F4,
+	(unsigned char)(addr &gt;&gt; 32));</p>
+	</li><li><p align="left">Send bits 8-15 to port 0x1F4: outb(0x1F4,
+	(unsigned char)(addr &gt;&gt; 8));</p>
+	</li><li><p align="left">Send bits 40-47 to port 0x1F5: outb(0x1F5,
+	(unsigned char)(addr &gt;&gt; 40));</p>
+	</li><li><p align="left">Send bits 16-23 to port 0x1F5: outb(0x1F5,
+	(unsigned char)(addr &gt;&gt; 16));</p>
+	</li><li><p align="left">Send the drive indicator and some magic bits to
+	port 0x1F6: outb(0x1F6, 0x40 | (drive &lt;&lt; 4));</p>
+	</li><li><p align="left"> Send the command (0x24) to port 0x1F7:
+	outb(0x1F7, 0x24);</p>
+</li></ol>
+<p align="left">To write a sector using LBA48:</p>
+<p align="left">  Do all the same as above, but send 0x34 for the
+command byte, instead of 0x24: outb(0x1F7, 0x34);</p>
+<p align="left"><br><br>
+</p>
+<p align="left">Once you've done all this, you just have to wait for
+the drive to signal that it's ready:</p>
+<p align="left">while (!(inb(0x1F7) &amp; 0x08)) {}</p>
+<p align="left">And then read/write your data from/to port 0x1F0:</p>
+<p align="left">// for read:</p>
+<p align="left">for (idx = 0; idx &lt; 256; idx++)</p>
+<p align="left">{</p>
+<p align="left">	tmpword = inw(0x1F0);</p>
+<p align="left">	buffer[idx * 2] = (unsigned char)tmpword;</p>
+<p align="left">	buffer[idx * 2 + 1] = (unsigned char)(tmpword &gt;&gt;
+8);</p>
+<p align="left">}</p>
+<p align="left">// for write:</p>
+<p align="left">for (idx = 0; idx &lt; 256; idx++)</p>
+<p align="left">{</p>
+<p align="left">	tmpword = buffer[8 + idx * 2] | (buffer[8 + idx * 2 +
+1] &lt;&lt; 8);</p>
+<p align="left">	outw(0x1F0, tmpword);</p>
+<p align="left">}</p>
+<p align="left">  Of course, all of this is useless if you don't know
+what drives you actually have hooked up. Each IDE controller can
+handle 2 drives, and most computers have 2 IDE controllers. The
+primary controller, which is the one I have been dealing with
+thus-far has its registers located from port 0x1F0 to port 0x1F7. The
+secondary controller has its registers in ports 0x170-0x177.
+Detecting whether controllers are present is fairly easy:</p>
+<ol>
+	<li><p align="left">Write a magic value to the low LBA port for that
+	controller (0x1F3 for the primary controller, 0x173 for the
+	secondary): outb(0x1F3, 0x88);</p>
+	</li><li><p align="left">Read back from the same port, and see if what you
+	read is what you wrote. If it is, that controller exists.</p>
+</li></ol>
+<p align="left">  Now, you have to detect which drives are present on
+each controller. To do this, you simply select the appropriate drive
+with the drive/head select register (0x1F6 for the primary
+controller, 0x176 for the secondary controller), wait a small amount
+of time (I wait 1/250<sup>th</sup> of a second), and then read the
+status register and see if the busy bit is set:</p>
+<p align="left">outb(0x1F6, 0xA0);	// use 0xB0 instead of 0xA0 to test
+the second drive on the controller</p>
+<p align="left">sleep(1);	// wait 1/250<sup>th</sup> of a second</p>
+<p align="left">tmpword = inb(0x1F7);	// read the status port</p>
+<p align="left">if (tmpword &amp; 0x40)	// see if the busy bit is set</p>
+<p align="left">{</p>
+<p align="left">	printf("Primary master exists\n");</p>
+<p align="left">}</p>
+<p align="left">  And that about wraps it up. Note that I haven't
+actually tested my LBA48 code, because I'm stuck with Bochs, which
+only supports LBA28. It should work, according to the ATA
+specification.</p>
+<p align="left">If any of this is inaccurate or unclear, just email me
+at <a href="mailto:marsdragon88@gmail.com">marsdragon88@gmail.com</a>.</p>
+<p align="left"><br><br>
+</p>
+<p align="left">--Dragoniz3r</p>
+
+     <div id="credit">© All Rights Reserved Bona Fide OS development 2001-2006. We Disclaim responsibility for all bad things, good things okay.
+     			<!-- BEGIN pStats! Tracking Code -->
+<script language="javascript"><!--
+document.write('<a target="_new" href="http://www.pstats.com/scripts/reports.asp?id=613"><img alt="" border="0" src="');
+document.write('http://www.pstats.com/scripts/stats.asp?id=613&loc=');
+document.write(escape(document.location));
+document.write('&ref=' + escape(document.referrer));
+document.write('&res=' + screen.width + 'x' + screen.height);
+document.write('&type=graphic">');
+document.write('</'+'a>');
+// --></script><a target="_new" href="http://www.pstats.com/scripts/reports.asp?id=613"><img alt="" src="lba-Dateien/stats.asp" border="0"></a>
+<noscript><a href="http://www.pstats.com"><img src="http://www.pstats.com/scripts/stats.asp?id=613" alt="" border="0"></a></noscript>
+<!-- END pStats! Tracking Code -->
+
+				
+				<!-- BEGIN stat digest Tracking Code -->                                                                                        
+				<script type="text/javascript">
+				<!--                                                                                          
+				document.write('<a target="_stats" href="http://www.statdigest.com/"><img border=0 src="');             
+				document.write('http://log.statdigest.com/?id=1&url=');                                                      
+				document.write(escape(document.location));                                                                                  
+				document.write('&ref=' + escape(document.referrer));                                                                        
+				document.write('&res=' + screen.width + 'x' + screen.height + '">');                                                               
+				document.write('</'+'a>');                                                                                                     
+				//-->
+				</script><a target="_stats" href="http://www.statdigest.com/"><img src="lba-Dateien/a" border="0"></a>
+				<noscript><a href="http://www.statdigest.com"><img src="http://log.statdigest.com/?id=1" border="0"></a></noscript>
+				<!-- END stat digest Tracking Code --></div></td>
+
+</tr></tbody></table></body></html>

@@ -1,0 +1,40 @@
+a.glossary-indicator {
+	vertical-align: super;
+	cursor: help;
+	font-size: xx-small;
+	padding-left: 2px;
+	font-weight: bold
+}
+
+a.glossary-term {
+	text-decoration: none;
+	border-bottom: 1px dotted #080;
+	color: #080;
+	cursor: help;
+}
+
+dl.glossary-list > dt {
+	font-weight: bold;
+}
+
+dl.glossary-list > dd {
+	font-weight: normal;
+	font-size: x-small;
+	margin-left: 15px;
+}
+
+a.glossary-edit-term {
+	font-size: x-small;
+	font-weight: normal;
+	padding-left: 6px;
+}
+
+.glossary-related {
+	font-style: italic;
+}
+
+.glossary-links {
+	text-align: center;
+	letter-spacing: -0.05em;
+}
+

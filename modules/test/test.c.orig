@@ -1,0 +1,1008 @@
+#include <raykernel.h>
+#include <kdisplay/kprintf.h>
+#include <threads/sleep.h>
+#include <threads/threads.h>
+#include <rmi/rmi.h>
+#include <ray/arguments.h>
+#include <memory/memory.h>
+#include <string.h>
+
+#include <pid/pids.h>
+#include "../i8042/exports.h"
+#include "../dmesg/exports.h"
+
+#include "../fs/charexports.h"
+#include "../fs/fsregister.h"
+#include "../fs/charerr.h"
+
+#include "../i8042/usrkbd.h"
+#include "../pci/pcitypes.h"
+
+#include "../vfs/exports.h"
+#include "../vfs/vfstypes.h"
+
+#include "vendors.h"
+#include "elf.h"
+
+#include <drivers/keyboard/raykeybind.h>
+
+#define EXPORT_GET_CH	0
+
+#define CPUIDread(n,w,x,y,z) asm("cpuid" : "=a" (w), "=b" (x), "=c" (y), "=d" (z) : "0" (n))
+#define CPUextended 0x80000000UL
+#define CPUmodelName 0x80000002UL
+
+#define READTSC(var) __asm__ __volatile__("rdtsc":"=a"(var)::"edx")
+
+#define StringDirAttrib(var, attr, ind, chr) if (var & attr) acr[ind] = chr; else acr[ind] = '-';
+
+char *inputBuf;
+UINT8 bufPos = 0;
+
+NEW_MUTEX(testMutex);
+IPLOCK sharedLock;
+
+UINT32 sharedResource = 0;
+UINT32 tickerLine = 5;
+
+
+void printCPUInfo() {
+	UINT32 vendorString[13];
+
+	CPUIDread(0, vendorString[0], vendorString[1], vendorString[3], vendorString[2]);
+	vendorString[4] = 0;
+
+	KPrintf ("CPU: %s ", (UINT32)vendorString+4);
+
+	CPUIDread(CPUextended, vendorString[0], vendorString[1], vendorString[2], vendorString[3]);
+
+	CPUIDread(CPUmodelName, vendorString[0], vendorString[1], vendorString[2], vendorString[3]);
+	CPUIDread(CPUmodelName+1, vendorString[4], vendorString[5], vendorString[6], vendorString[7]);
+	CPUIDread(CPUmodelName+2, vendorString[8], vendorString[9], vendorString[10], vendorString[11]);
+	vendorString[12] = 0;
+	KPrintf ("(Model %s)\n", (UINT32)vendorString);
+}
+
+void PrintPCIResource(PCI_RESOURCES *resource) {
+	switch (resource->IOType) {
+	case PCIResourceIsIO:
+		KPrintf(" -    IO: %x - %x\n", resource->range.rangeIO.IOStart, resource->range.rangeIO.IOStart + resource->range.rangeIO.IOLength - 1);
+		break;
+	case PCIResourceIsMemory:
+		KPrintf(" -Memory: %x - %x ", resource->range.rangeMem.MemoryStart, resource->range.rangeMem.MemoryStart + resource->range.rangeMem.MemoryLength - 1);
+		switch (resource->range.rangeMem.MemoryType) {
+			case PCIMemTypeStandard:
+				KPrintf("(Standard)\n");
+				break;
+			case PCIMemTypePrefetchable:
+				KPrintf("(Prefetchable)\n");
+				break;
+		}
+		break;
+	case PCIResourceUnused:
+		/* resource not used */
+		break;
+	}
+}
+
+void ShowPCIdevices() {
+	RMIMESSAGE devices;
+	PCIDeviceArray *pciDevices;
+	int i, j;
+	int list;
+	PCIDevice *deviceList;
+
+	KPrintf ("PCI device list:\n");
+	switch (RMInvoke(DRV_PCI, 0, 0, TRUE, &devices)) {
+			case RMI_SUCCESS:
+				if (devices) {
+					pciDevices = (PCIDeviceArray*)devices;
+					deviceList = RMIGetOffset(pciDevices, PCIDevice, list);
+					for (i = 0; i < pciDevices->numPCIDevices; i++) {
+						for (list = 0; list < PCI_DEVTABLE_LEN; list++) {
+							if ((PciDevTable[list].VenID == deviceList[i].configSpace.PCIHeader.vendorID) && (PciDevTable[list].DevID == deviceList[i].configSpace.PCIHeader.deviceID)) {
+								KPrintf ("%u: %s\n", i, (UINT32)PciDevTable[list].CardName);
+								for (j = 0; j < 6; j++) {
+									PrintPCIResource(&deviceList[i].resource[j]);
+								}
+								if (deviceList[i].configSpace.PCIHeader.interruptLine) {
+									KPrintf (" -   IRQ: %d\n", deviceList[i].configSpace.PCIHeader.interruptLine);
+								}
+								break;
+							}
+						}
+						if (list == PCI_DEVTABLE_LEN) {
+							/* end of list - not found */
+							KPrintf("%u: Unknown device %x\n", i, deviceList[i].configSpace.PCIHeader.vendorID);
+						}
+					}
+					FreeMessageBuffer(devices);
+				} else {
+					KPrintf ("PCI database encountered error!\n");
+				}
+				break;
+			case RMI_NOT_SUPPORTED:
+				KPrintf ("PCI driver seems not to be loaded!\n");
+				break;
+			default:
+				KPrintf ("An error occured while contacting the pci driver.\n");
+			}
+}
+void StartBenchMark() {
+	RMIMESSAGE benchResult;
+	KPrintf ("Benchmarking...\n");
+	benchResult = 0;
+	switch (RMInvoke(0xDEADBEEF, 0, 0, TRUE, &benchResult)) {
+	case RMI_SUCCESS:
+		if (benchResult) {
+			KPrintf ("Benchmark result is: %s\n", (UINT32)benchResult);
+			FreeMessageBuffer(benchResult);
+		} else {
+			KPrintf ("Interrupted!\n");
+		}
+		break;
+	case RMI_NOT_SUPPORTED:
+		KPrintf ("Bemchmark driver seems not to be loaded!\n");
+		break;
+	default:
+		KPrintf ("An error occured while contacting the Benchmark driver.\n");
+	}
+}
+
+void CoolThread(UINT32 argument) {
+	int i, j;
+
+	
+	for (i = 0;i < 100;i++) {
+		KernelMutexAcquire(&testMutex);	
+		for (j = 0; j < 100; j++) {
+			KPrintf ("[%u] ",argument);
+			sharedResource++;
+		}
+		if (KernelMutexRelease(&testMutex) == MUTEX_ALREADY_FREE) {
+			KPrintf ("Error: Mutex already free!");
+			ExitThread();
+		}
+		
+	}
+	
+	MUTEX_STATE status = KernelMutexStatus(&testMutex);
+	KPrintf ("Thread #%u: sharedResource is now %u (mutex status is: %u)\n", argument, sharedResource, status);
+	ExitThread();
+}
+
+void IPLockThread(UINT32 argument) {
+	int i, j;
+
+	
+	for (i = 0;i < 100;i++) {
+		ProcessLockEnter(sharedLock);
+		for (j = 0; j < 100; j++) {
+			KPrintf ("[%u] ",argument);
+			sharedResource++;
+		}
+		if (ProcessLockLeave(sharedLock) == MUTEX_ALREADY_FREE) {
+			KPrintf ("Error: Mutex already free!");
+			ExitThread();
+		}
+		
+	}
+	
+	MUTEX_STATE status = ProcessLockStatus(sharedLock);
+	KPrintf ("Thread #%u: sharedResource is now %u (lock status is: %u)\n", argument, sharedResource, status);
+	
+	if (sharedResource == 50000) {
+		KPrintf ("I'm the last thread. ATTENTION!!! I'm destroying the IP-lock now!");
+		switch (ProcessLockDestroy(sharedLock)) {
+			case 0:
+				KPrintf ("Lock not found!\n");
+				break;
+			case 1:
+				KPrintf ("Lock successfully destroyed.\n");
+				break;
+			default:
+				KPrintf ("Lock could not be destroyed. Still a few threads in critical section!\n");
+				break;
+		}
+	}
+	
+	ExitThread();
+}
+
+void SpinThread1() {
+	UINT8 c[] = {'/', '-', '\\', '|'};
+	UINT8 index = 0;
+	// 193
+	for(;;) {
+		VideoWriteAttribute(79, 49, 0x1400 + c[index]);
+		index = (index +1) % sizeof(c);
+		Pause(100);
+	}
+}
+
+static UINT32 getRand(int range) {
+	UINT32 var;
+	
+	READTSC(var);
+	return var % range;
+}
+
+void MatrixThread() {
+	
+	UINT32 dark = 0x1200;
+	UINT32 light = 0x1a00;
+	
+	UINT32 pos[80];
+	UINT32 sym[80];
+	int i, j;
+	
+	for (i = 0; i < 80; i++) {
+		pos[i] = 0;
+		sym[i] = 255 - getRand(30);
+	}
+	
+	for(;;) {
+		for (i = 0; i < 80; i++) {
+			// draw vertical line
+			for (j = 0; j < pos[i]; j++) {
+				VideoWriteAttribute(i, j, dark + sym[i] + j - pos[i]);
+			}
+			VideoWriteAttribute(i, j, light + sym[i] - j);
+			
+			pos[i] = (pos[i] + getRand(2)) % 50;
+		}
+		
+		Pause(50);
+	}
+}
+
+void TickerThread(UINT32 line) {
+	char *message = "+++ This is the ticker thread +++";
+	UINT32 length = strlen(message);
+	UINT32 i;
+	SINT32 col, absPos;
+	
+	col = 79;
+	
+	for(;;) {
+	
+		// print the message
+		for (i = 0; i < length; i++) {
+			absPos = col + i;
+			
+			if ((absPos >= 0) && (absPos <= 79)) {
+				VideoWriteAttribute(absPos, line, 0x7800 + message[i]);
+			}
+		}
+		
+		col--;
+		
+		if (col + length == 0) col = 79;
+		Pause(50);
+	}
+}
+
+void uptimeThread() {
+	UINT8 upTime[4] = {0,0,0,0};
+	int i;
+	
+	for(;;) {
+		for (i = 3; i >= 0; i--) {
+			if (upTime[i] == 10) {
+				upTime[i-1]++;
+				upTime[i] = 0;
+			}
+			VideoWriteAttribute(76+i, 2, 0x3800 + '0' + upTime[i]);
+		}
+		upTime[3]++;
+		Pause(1000);
+	}
+}
+
+
+void StartThread(void *target) {
+	ARGUMENTS args;
+	
+	args.count = 0;
+	args.values = NULL;
+	
+	CreateThread(target, RAY_PRIO_NORMAL, &args);
+}
+
+void StartThreadArgument(void *target, UINT32 argument) {
+	ARGUMENTS args;
+	UINT32 valueList[1] = {argument};
+	
+	args.count = 1;
+	args.values = valueList;
+	
+	CreateThread(target, RAY_PRIO_NORMAL, &args);
+}
+
+
+void LockTest() {
+	int i;
+	
+	for (i = 0; i < 5; i++) {
+		StartThreadArgument(IPLockThread, i);
+	}
+}
+
+void ThreadTest() {
+	int i;
+	
+	for (i = 0; i < 5; i++) {
+		StartThreadArgument(CoolThread, i);
+	}
+}
+
+void ShowDMesg() {
+	RMIMESSAGE data;
+	char *string;
+
+	switch (RMInvoke(DRV_DMESG, EXPORT_GETBUFFER, 0, TRUE, &data)) {
+	case RMI_SUCCESS:
+		if (data) {
+			if ((UINT32)data < 10) {
+				KPrintf ("Error reading dmesg!\n");
+				return;
+			}
+			string = (char*)data;
+			KPrintf (string);
+			KPrintf ("\n");
+			FreeMessageBuffer(data);
+		} else {
+			KPrintf ("Error reading dmesg buffer!\n");
+		}
+		break;
+	case RMI_NOT_SUPPORTED:
+		KPrintf ("dmesg driver not loaded!\n");
+		break;
+	default:
+		KPrintf ("An error occured while contacting the dmesg driver!\n");
+	}
+}
+
+VFS_BUFFER ReadFileAt(VFS_HANDLE handle, UINT64 position, UINT64 length) {
+	FILESTREAM stream;
+	RMIMESSAGE result;
+	
+	stream = (FILESTREAM)AllocateMessageBuffer(sizeof(struct _FILESTREAM), RTYPE_STRING);
+	stream->position = position;
+	stream->length = length;
+	stream->handle = handle;
+	
+	if (stream) {
+		switch (RMPassMessage(DRV_VFS, VFS_EXPORT_READFILEAT, (RMIMESSAGE)stream, TRUE, &result)) {
+		case RMI_SUCCESS:
+			return (VFS_BUFFER)result;
+			break;
+		default:
+			return NULL;
+			break;
+		}
+	} else {
+		KPrintf ("memory allocation failed!");
+		return NULL;
+	}
+}
+
+VFS_INFO FileInfo(VFS_HANDLE handle) {
+	RMIMESSAGE result;
+	switch (RMInvoke(DRV_VFS, VFS_EXPORT_FILEINFO, handle.handleUID, TRUE, &result)) {
+		case RMI_SUCCESS:
+			return (VFS_INFO)result;
+			break;
+		default:
+			return NULL;
+			break;
+	}
+}
+
+inline VFS_HANDLE VFSOpen(PTUString path, VFS_ACCESS mode) {
+	RMIMESSAGE result;
+	ACCOBJ access;
+	VFS_HANDLE failed;
+	
+	access = (ACCOBJ)AllocateMessageBuffer(sizeof(struct _ACCOBJ) + sizeof(UChar) * path->length, RTYPE_STRING);
+	
+	RMINewStructure(rmiStruct, access, access + 1);
+	CreateRMIStructFromStringP(rmiStruct, access, objPath, path);
+	
+	access->mode = mode;
+	
+	switch (RMPassMessage(DRV_VFS, VFS_EXPORT_ACCESSFILE, (RMIMESSAGE)access, TRUE, &result)) {
+	case RMI_SUCCESS:
+		access = (ACCOBJ)result;
+		if (access->errCode == VFS_SUCCESS) {
+			failed = access->handle;
+		} else {
+			KPrintf ("Error %u [Additinal error info: %u]!\n", access->errCode, access->extendedErrorInfo);
+			failed.handleUID = 0;
+		}
+		FreeMessageBuffer((RMIMESSAGE)result);
+		break;
+	default:
+		failed.handleUID = 0;
+		FreeMessageBuffer((RMIMESSAGE)access);
+		return failed;
+	}
+	return failed;
+}
+
+VFS_HANDLE OpenFile(PTUString path) {
+	return VFSOpen(path, VFS_ACC_READ);
+}
+
+VFS_HANDLE OpenDir(PTUString path) {
+	return VFSOpen(path, VFS_ACC_LIST);
+}
+
+BOOL CloseFile(VFS_HANDLE handle) {
+	RMIMESSAGE result;
+	ACCOBJ access;
+
+	access = (ACCOBJ)AllocateMessageBuffer(sizeof(struct _ACCOBJ), RTYPE_STRING);
+	memset(access, 0, sizeof(struct _ACCOBJ));
+
+	access->handle = handle;
+	access->mode = VFS_ACC_CLOSE;
+
+	switch (RMPassMessage(DRV_VFS, VFS_EXPORT_ACCESSFILE, (RMIMESSAGE)access, TRUE, &result)) {
+	case RMI_SUCCESS:
+		access = (ACCOBJ)result;
+		if (access->errCode == VFS_SUCCESS) {
+			FreeMessageBuffer((RMIMESSAGE)result);
+			return TRUE;
+		} else {
+			FreeMessageBuffer((RMIMESSAGE)result);
+			return FALSE;
+		}
+		break;
+	default:
+		return FALSE;
+	}
+}
+
+VFS_INFO FindNextFile(VFS_HANDLE handle) {
+	RMIMESSAGE result;
+
+	switch (RMInvoke(DRV_VFS, VFS_EXPORT_FINDNEXTFILE, handle.handleUID, TRUE, &result)) {
+	case RMI_SUCCESS:
+		return (VFS_INFO)result;
+		break;
+	default:
+		KPrintf ("Error contacting vfs");
+		return NULL;
+	}
+}
+
+void readtest(char *path) {
+	PTUString unicodePath = ConvertASCIItoTUString(path);
+	VFS_HANDLE fileHandle;
+	VFS_BUFFER buff;
+	
+	fileHandle = OpenFile(unicodePath);
+	free(unicodePath);
+	
+	if (fileHandle.handleUID) {
+		buff = ReadFileAt(fileHandle, 0, 175);
+		if (buff) {
+			if (buff->errCode == VFS_SUCCESS) {
+				// termination;
+				unsigned char *content = (unsigned char*)((UINT32)buff->buffer + (UINT32)buff);
+				content[buff->bufferLength-1] = 0;
+				KPrintf("File content:\n%s\n", content);
+			} else {
+				KPrintf ("Error %u reading file.\n", buff->errCode);
+			}
+			FreeMessageBuffer((RMIMESSAGE)buff);
+		} else {
+			KPrintf ("Null-Pointer returned!\n");
+		}
+		CloseFile(fileHandle);
+	} else {
+		KPrintf ("Could not open file: %s!\n", (UINT32)path);
+	}
+	
+}
+
+char *getFileName(char *path) {
+	char *lastSlash = path;
+	
+	while (*path) {
+		if (*path++ == '/') {
+			lastSlash = path;
+		}
+	}
+	return lastSlash;
+}
+
+void StartExecutable(char *path, char *command) {
+	PTUString unicodePath = ConvertASCIItoTUString(path);
+	VFS_HANDLE fileHandle;
+	VFS_BUFFER buff;
+	UINT32 fileSize;
+	fileHandle = OpenFile(unicodePath);
+	free(unicodePath);
+	
+	if (fileHandle.handleUID) {
+		
+		// get file size
+		VFS_INFO info;
+		info = FileInfo(fileHandle);
+		if (info) {
+			if (info->aOwner.is & VFS_ATTR_DIRECTORY) {
+				KPrintf ("%s is a directory.\n", path);
+				return;
+			}
+			fileSize = info->fileSize;
+			FreeMessageBuffer((RMIMESSAGE)info);
+		} else {
+			KPrintf ("Null-Pointer returned!\n");
+		}
+		
+		buff = ReadFileAt(fileHandle, 0, fileSize);
+		if (buff) {
+			if (buff->errCode == VFS_SUCCESS) {
+				// termination;
+				unsigned char *content = (unsigned char*)((UINT32)buff->buffer + (UINT32)buff);
+				if (!ELF32LoadFile(content, fileSize, getFileName(path), command)) {
+					KPrintf ("Error loading %s.\n", path);
+				}
+			} else {
+				KPrintf ("Error %u reading file.\n", buff->errCode);
+			}
+			FreeMessageBuffer((RMIMESSAGE)buff);
+		} else {
+			KPrintf ("Null-Pointer returned!\n");
+		}
+		CloseFile(fileHandle);
+	} else {
+		KPrintf ("Could not open file: %s!\n", (UINT32)path);
+	}
+	
+}
+
+void ParseStart(char *string) {
+	char *path = string;
+	char *command = strchr(string, ' ');
+	if (command == NULL) {
+		command = "";
+	} else {
+		*command = '\0';
+		command++;
+	}
+	StartExecutable(path, command);
+}
+
+
+void fileSize(char *path) {
+	PTUString unicodePath = ConvertASCIItoTUString(path);
+	VFS_HANDLE fileHandle;
+	VFS_INFO info;
+	
+	fileHandle = OpenFile(unicodePath);
+	free(unicodePath);
+	
+	if (fileHandle.handleUID) {
+		info = FileInfo(fileHandle);
+		if (info) {
+			if (info->aOwner.is & VFS_ATTR_DIRECTORY) {
+				KPrintf ("%s is a directory.\n", path);
+			} else {
+				KPrintf ("File size: %u bytes, attributes: %u\n", info->fileSize, info->aOwner);
+			}
+			FreeMessageBuffer((RMIMESSAGE)info);
+		} else {
+			KPrintf ("Null-Pointer returned!\n");
+		}
+		CloseFile(fileHandle);
+	} else {
+		KPrintf ("Could not open file: %s!\n", path);
+	}
+	
+}
+
+void ls(char *path) {
+	VFS_HANDLE rootDir;
+	VFS_INFO object;
+	char *temp;
+	
+	char acr[] = "-----";
+	PTUString unicodePath;
+
+	KPrintf ("Contents of %s:\n", (UINT32)path);
+
+	unicodePath = ConvertASCIItoTUString(path);
+	rootDir = OpenDir(unicodePath);
+	free(unicodePath);
+
+	if (rootDir.handleUID) {
+		//KPrintf ("Directory successfully opened (handle %u)\n", rootDir.handleUID, 0);
+		object = FindNextFile(rootDir);
+		if (object) {
+			while(object->errCode == VFS_SUCCESS) {
+				TUString currFileName = CreateStringFromRMIStruct(object, name);
+				temp = ConvertTUStringToASCII(&currFileName);
+
+				// list directories in a different way
+				StringDirAttrib(object->aOwner.is, VFS_ATTR_DIRECTORY, 0, 'd');
+				StringDirAttrib(object->aOwner.is, VFS_ATTR_READABLE, 1, 'r');
+				StringDirAttrib(object->aOwner.is, VFS_ATTR_WRITABLE, 2, 'w');
+				StringDirAttrib(object->aOwner.is, VFS_ATTR_EXECUTABLE, 3, 'x');
+				StringDirAttrib(object->aOwner.is, VFS_ATTR_HIDDEN, 4, 'h');
+				KPrintf(" %s\t%s\t%u Bytes\n", acr, temp, object->fileSize);
+				
+
+				free(temp);
+				FreeMessageBuffer((RMIMESSAGE)object);
+				object = FindNextFile(rootDir);
+			}
+			//KPrintf ("Last FindNextFileError was: %u\n", object->errCode, 0);
+			FreeMessageBuffer((RMIMESSAGE)object);
+
+		} else {
+			KPrintf ("object was NULL!\n");
+		}
+		if (!CloseFile(rootDir)) {
+			KPrintf ("Closing file failed!\n");
+		}
+	} else {
+		KPrintf ("Could not open directory '%s'\n", (UINT32)path);
+	}
+
+}
+
+void ShowMountUsage() {
+	KPrintf ("Usage: mount DIRECTORY DISK PARTITION\n");
+	KPrintf ("\tDIRECTORY\tPath where 1st partition will be mounted to\n");
+	KPrintf ("\tDISK\t\tNumber of hard drive\n");
+	KPrintf ("\tPARTITION\tPartition number on that hard drive\n");
+}
+
+void MountHDD(char *dir, UINT32 drive, UINT32 partition) {
+	RMIMESSAGE result;
+	INIT_MOUNT* toMount;
+	PTUString regNode = ConvertASCIItoTUString("/");
+	PTUString nodeName = ConvertASCIItoTUString(dir);
+	PTUString info = ConvertASCIItoTUString("Testmount");
+
+	/* ============= prepare strings ================== */
+	toMount = (INIT_MOUNT*)AllocateMessageBuffer(sizeof(INIT_MOUNT) + (regNode->length + nodeName->length + info->length) * sizeof(UChar), RTYPE_STRING);
+
+	RMINewStructure(rmiStruct, toMount, toMount + 1);
+	CreateRMIStructFromStringP(rmiStruct, toMount, registerPath, regNode);
+	CreateRMIStructFromStringP(rmiStruct, toMount, nodeName, nodeName);
+	CreateRMIStructFromStringP(rmiStruct, toMount, addInfo, info);
+
+	/* ================================================ */
+
+	toMount->mountInfo.hardDrive = drive;
+	toMount->mountInfo.partition = partition;
+	toMount->mountInfo.forceFSType = FS_AUTODETECT;
+
+	switch (RMPassMessage(DRV_ATA, CHAR_EXPORT_MOUNT, (RMIMESSAGE)toMount, TRUE, &result)) {
+	case RMI_SUCCESS:
+		toMount = (INIT_MOUNT*)result;
+		switch (toMount->errCode) {
+		case CHAR_ERR_SUCCESS:
+			KPrintf ("Successfully mounted (%s)!\n",(UINT32)toMount->identifier);
+			break;
+		default:
+			KPrintf ("Error mounting device: ");
+			switch(toMount->errCode) {
+				case 2: KPrintf ("Out of memory\n");break;
+				case 3: KPrintf ("Setup failed\n");break;
+				case 4: KPrintf ("Read error\n");break;
+				case 5: KPrintf ("Request error\n");break;
+				case 100: KPrintf ("Already registered\n");break;
+				case 101: KPrintf ("Unsupported VFS function\n");break;
+				case 102: KPrintf ("File system not supported\n");break;
+				case 120: KPrintf ("Invalid partition\n");break;
+				case 121: KPrintf ("Invalid disk drive\n");break;
+				case 122: KPrintf ("Mounting error\n");break;
+				case 123: KPrintf ("Unexpected end\n");break;
+				case 124: KPrintf ("No drives found\n");break;
+				default: KPrintf ("(unknown)\n");
+			}
+		}
+		break;
+	case RMI_NOT_SUPPORTED:
+		KPrintf ("ata driver not loaded!\n");
+		break;
+	default:
+		KPrintf ("An error occured while contacting the ata driver!\n");
+	}
+
+	FreeMessageBuffer((RMIMESSAGE)toMount);
+}
+
+UINT32 StringToInt(char *string) {
+	UINT32 result = 0;
+	
+	while(*string) {
+		if ((*string >= '0') && (*string <= '9')) {
+			result *= 10;
+			result += *string - '0';
+			string++;
+		} else {
+			return 0;
+		}
+	}
+	
+	return result;
+}
+
+void ParseMount(char *string) {
+	char *dir = string;
+	char *drive, *part;
+	
+	drive = strchr(string, ' ');
+	if (drive == NULL) {
+		ShowMountUsage();
+		return;
+	}
+	
+	*drive = '\0';	// terminate "dir"
+	drive++;	// skip space
+	
+	part = strchr(drive, ' ');
+	if (part == NULL) {
+		ShowMountUsage();
+		return;
+	}
+	*part = '\0';
+	part++;
+	
+	UINT32 drvNum, partNum;
+	
+	drvNum = StringToInt(drive);
+	partNum = StringToInt(part);
+	
+	MountHDD(dir, drvNum, partNum);
+	
+}
+
+void PercentToString(float flt, char *string) {	
+	UINT32 number = (UINT32)(flt * 1000.f);
+	string[4] = 0;
+	string[3] = (number % 10)+ '0'; number /= 10;
+	string[2] = '.';
+	string[1] = (number % 10)+ '0'; number /= 10;
+	string[0] = (number % 10)+ '0'; number /= 10;
+}
+
+
+void my_itoa(UINT32 number, char *string) {	
+	string[2] = 0;
+	string[1] = (number % 10) + '0';
+	number /= 10;
+	string[0] = (number % 10) + '0';
+	
+}
+
+void ProcessInfo() {
+	THREAD_INFO_LIST *info;
+	UINT32 i, pLen;
+	char *states[5] = {"RUN", "IDLE", "WAIT", "MSG", "EVENT"};
+
+	info = GetThreadInfo(THREAD_INFO_ALL);
+
+	if (info) {
+		KPrintf ("%u threads currently running.\nKernel Memory %u bytes.\n", info->numThreads, info->kernelMemory);
+		KPrintf ("Name\t\tPID\tMEM\tALLOCS\t\tTHREAD\tCPU-Clc\tSTATUS\n");
+		KPrintf ("=============== ======= ======= =============== ======= ======= =======\n");
+		for (i = 0; i < info->numThreads; i++) {
+			pLen = strlen((char*)info->thread[i].ident);
+			if (pLen < 8) {
+				info->thread[i].ident[pLen] = '\t';
+				info->thread[i].ident[pLen+1] = '\0';
+			}
+			
+			KPrintf ("%s\t%u\t", info->thread[i].ident, info->thread[i].pid);
+			KPrintf ("%uK\t%u\t%u:%u\t", info->thread[i].usedPages << 2, info->thread[i].memAllocs, info->thread[i].lastFitPointerCode, info->thread[i].lastFitPointerData);
+			KPrintf ("%u\t{NYI}\t", info->thread[i].threadNum);
+			KPrintf ("%s\n", states[info->thread[i].state]);
+		}
+		KPrintf ("Total memory usage: %u bytes (%u Bytes free)\n", info->memUsageTotal, info->memFree);
+		free(info);
+	} else {
+		KPrintf ("Error getting process information!\n");
+	}
+}
+
+void ShowUsage() {
+	KPrintf ("NURNware tinyShell v0.01\n");
+	KPrintf ("Available commands are:\n");
+	KPrintf ("\thelp\t\tShow this help\n");
+	KPrintf ("\tcpuinfo\t\tCPU information\n");
+	KPrintf ("\tpci\t\tList PCI devices\n");
+	KPrintf ("\tmutex\t\tCreate 4 threads that heavily access a shared \n\t\t\tresource using a mutex\n");
+	KPrintf ("\tlock\t\tCreate 4 threads that heavily access a shared \n\t\t\tresource using IP locks\n");
+	KPrintf ("\tps\t\tProcess and thread info\n");
+	KPrintf ("\tmount\t\tTry to mount 1st file system on 1st partition\n");
+	KPrintf ("\tcat\t\tRead file to console\n");
+	KPrintf ("\tsize\t\tSize of a file in bytes\n");
+	KPrintf ("\tstart\t\tStart an ELF executable\n");
+	KPrintf ("\tdmesg\t\tShow diagnostic messages\n");
+	KPrintf ("\tbenchmark\tBenchmark how many CPU cycles 2000 IPC messages take\n");
+	KPrintf ("\tticker\t\tStart ticker thread\n");
+	KPrintf ("\tstack\t\tStack execution test (security feature)\n");
+	KPrintf ("\tarray\t\tArray boundary test (security feature)\n");
+	KPrintf ("\texit\t\tExit this process(shell)\n");
+
+	KPrintf ("\treboot\t\tReboot computer\n");
+}
+
+void stackTest() {
+	// x86 instructions : nop, nop, nop, ret
+	unsigned char stack_instructions[] = {0x90, 0x90, 0x90, 0xc3};
+	
+	KPrintf ("Executing the stack...\n");
+	
+	// declare function
+	void (*dataFunction)();
+	
+	// set it to the data containing processor instructions
+	dataFunction = (void*)stack_instructions;
+	
+	// call them
+	dataFunction();
+		
+	// if we get here... oh oh
+	KPrintf ("Still alive. This shouldn't happen\n");
+}
+
+void arrayTest() {
+	KPrintf ("Allocating array of size 42...\n");
+	unsigned int *array = (unsigned int*)malloc(42 * sizeof(unsigned int));
+	
+	KPrintf ("Writing at element 43...\n");
+	array[42] = 666;
+	
+	KPrintf ("Still there. I've just overwritten some memory... Good luck!\n");
+}
+
+void ExitProgram() {
+	RMIMESSAGE dummy;
+	
+	switch(RMInvoke(DRV_KEYBOARD, RMIProcessDetach, 0, FALSE, &dummy)) {
+	case RMI_SUCCESS:
+		break;
+	case RMI_NOT_SUPPORTED:
+		KPrintf ("Keyboard observer not found! Exiting.\n");
+	default:
+		KPrintf ("Error while contacting keyboard driver.Exiting\n");
+		exit(4);
+	}
+	exit(0);
+}
+
+void shellCommand(char *command) {
+
+	if (strcmp(command, "exit") == 0) {
+		ExitProgram();
+	} else if (strcmp(command, "cpuinfo") == 0) {
+		printCPUInfo();
+	} else if (strcmp(command, "mutex") == 0) {
+		ThreadTest();
+	} else if (strcmp(command, "lock") == 0) {
+		LockTest();
+	} else if (strcmp(command, "start") == 0) {
+		KPrintf ("Usage: start FILENAME [ARGUMENTS]\n");
+		KPrintf ("\tFILENAME\t\tAbsolute file name of the executable to start\n");
+		KPrintf ("\tARGUMENTS\tString passed to the executable\n");
+	} else if (strncmp(command, "start ", 6) == 0) {
+		ParseStart(command + 6);
+	} else if (strcmp(command, "pci") == 0) {
+		ShowPCIdevices();
+	} else if (strcmp(command, "dmesg") == 0) {
+		ShowDMesg();
+	} else if (strcmp(command, "mount") == 0) {
+		ShowMountUsage();
+	} else if (strncmp(command, "mount ", 6) == 0) {
+		ParseMount(command + 6);
+	} else if (strcmp(command, "ps") == 0) {
+		ProcessInfo();
+	} else if (strcmp(command, "benchmark") == 0) {
+		StartBenchMark();
+	} else if (strcmp(command, "reboot") == 0) {
+		RMInvoke(DRV_KEYBOARD, DO_REBOOT, 0, FALSE, 0);
+	} else if (strcmp(command, "help") == 0) {
+		ShowUsage();
+	} else if (strncmp(command, "ls ", 3) == 0) {
+		ls(command + 3);
+	} else if (strcmp(command, "cat") == 0) {
+		KPrintf ("Usage: cat FILENAME\n");
+	} else if (strncmp(command, "cat ", 4) == 0) {
+		readtest(command + 4);
+	} else if (strcmp(command, "size") == 0) {
+		KPrintf ("Usage: size FILENAME\n");
+	} else if (strncmp(command, "size ", 5) == 0) {
+		fileSize(command + 5);
+	} else if (strcmp(command, "ticker") == 0) {
+		StartThreadArgument(TickerThread, tickerLine++);
+	} else if (strcmp(command, "stack") == 0) {
+		stackTest();
+	} else if (strcmp(command, "array") == 0) {
+		arrayTest();
+	} else if (strcmp(command, "matrix") == 0) {
+		StartThread(MatrixThread);
+	} else {
+		KPrintf ("Unknown command. Try 'help' to get help.\n");
+	}
+}
+
+CALLBACK getCh(RMISERIAL sender, UINT32 keyCode, UINT32 msgID) {
+	char currChar = (char)keyCode;
+	static char running = 0;
+	
+	if (running) ExitThread();
+
+	switch (currChar) {
+		case SP_KEY_BACKSPACE:
+			if (bufPos) {
+				bufPos--;
+				inputBuf[bufPos] = 0;
+			}
+			KPrintf("\r>%s ", (UINT32)inputBuf);
+			break;
+		case SP_KEY_RETURN:
+			KPrintf ("\n");
+			if (bufPos) {
+				running = 1;
+				shellCommand(inputBuf);
+				running = 0;
+				bufPos = 0;
+				inputBuf[0] = 0;
+			}
+			break;
+		default:
+			if (currChar > 31) {
+				inputBuf[bufPos] = currChar;
+				bufPos++;
+				inputBuf[bufPos] = 0;
+			}
+	}
+
+	KPrintf ("\r>%s", (UINT32)inputBuf);
+	ExitThread();
+}
+
+RAYENTRY KernelModuleEntry(char *arguments) {
+	int i;
+	RMIMESSAGE dummy;
+
+	RMISetup(0x12345678, 1);
+
+	for (i = 0; i < 5; i++) {
+		Relinquish();
+	}
+
+	switch(RMInvoke(DRV_KEYBOARD, RMIProcessAttach, EXPORT_GET_CH, FALSE, &dummy)) {
+		case RMI_SUCCESS:
+			break;
+		case RMI_NOT_SUPPORTED:
+			KPrintf ("Keyboard observer not found! Exiting.\n");
+		default:
+			KPrintf ("Error while contacting keyboard driver.Exiting\n");
+			exit(4);
+	}
+
+	inputBuf = (char*)malloc(256);
+
+	*inputBuf = 0;
+	RMIRegister(EXPORT_GET_CH, getCh, 255, FALSE);
+	KPrintf ("\n%s\n>", arguments);
+	
+	//StartThread(uptimeThread);
+	
+	sharedLock = ProcessLockCreate("teestlock");
+	if (!sharedLock) {
+		KPrintf("Error creating inter-process lock!");
+	}
+	
+	Sleep();
+	exit(5);
+}
